@@ -26,6 +26,21 @@ function cargarStockDesdeGoogleSheet() {
   });
 }
 
+function renderizarProductos() {
+  const contenedor = document.getElementById('productos');
+  contenedor.innerHTML = '';
+  productos.forEach(producto => {
+    const div = document.createElement('div');
+    div.className = 'producto';
+    div.innerHTML = `
+      <h3>${producto.nombre}</h3>
+      <p>${producto.descripcion}</p>
+      <p><strong>$${producto.precio}</strong></p>
+    `;
+    contenedor.appendChild(div);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   cargarStockDesdeGoogleSheet();
   productosCargados = true;
