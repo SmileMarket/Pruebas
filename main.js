@@ -30,14 +30,15 @@ function renderizarProductos() {
   const contenedor = document.getElementById('productos');
   contenedor.innerHTML = '';
   productos.forEach(producto => {
-    const stock = stockData[producto.nombre] ?? 99;
+    const stockRaw = stockData[producto.nombre];
+    const stock = isNaN(stockRaw) ? 99 : parseInt(stockRaw);
     const div = document.createElement('div');
     div.className = 'producto';
 
     const imagenHTML = `
       <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion}\`)">
         <img src="${producto.imagen}" alt="${producto.nombre}" />
-        ${stock === 0 ? '<div class="sin-stock-label">SIN STOCK</div>' : ''}
+        ${stock <= 0 ? '<div class="sin-stock-label">SIN STOCK</div>' : ''}
         <div class="info-overlay">+ info</div>
       </div>
     `;
