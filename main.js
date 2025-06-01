@@ -33,15 +33,32 @@ function renderizarProductos() {
     const stock = stockData[producto.nombre] ?? 99;
     const div = document.createElement('div');
     div.className = 'producto';
+
+    const imagenHTML = `
+      <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion}\`)">
+        <img src="${producto.imagen}" alt="${producto.nombre}" />
+        ${stock === 0 ? '<div class="sin-stock-label">SIN STOCK</div>' : ''}
+        <div class="info-overlay">+ info</div>
+      </div>
+    `;
+
     div.innerHTML = `
-      <img src="${producto.imagen}" alt="${producto.nombre}" />
-      ${stock === 0 ? '<div class="sin-stock-label">SIN STOCK</div>' : ''}
+      ${imagenHTML}
       <h3>${producto.nombre}</h3>
       <p class="precio">$${producto.precio.toLocaleString()}</p>
-      <p>${producto.descripcion}</p>
     `;
     contenedor.appendChild(div);
   });
+}
+
+function mostrarModalInfo(nombre, descripcion) {
+  document.getElementById('modal-titulo').textContent = nombre;
+  document.getElementById('modal-descripcion').textContent = descripcion;
+  document.getElementById('info-modal').style.display = 'flex';
+}
+
+function cerrarModalInfo() {
+  document.getElementById('info-modal').style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
