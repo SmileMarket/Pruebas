@@ -21,7 +21,7 @@ function cargarStockDesdeGoogleSheet() {
       intentarRenderizar();
     },
     error: function(err) {
-      console.error("Error al cargar CSV:", err);
+      console.error("Error cargando CSV:", err);
     }
   });
 }
@@ -34,10 +34,11 @@ function renderizarProductos() {
     const div = document.createElement('div');
     div.className = 'producto';
     div.innerHTML = `
+      <img src="${producto.imagen}" alt="${producto.nombre}" />
+      ${stock === 0 ? '<div class="sin-stock-label">SIN STOCK</div>' : ''}
       <h3>${producto.nombre}</h3>
+      <p class="precio">$${producto.precio.toLocaleString()}</p>
       <p>${producto.descripcion}</p>
-      <p><strong>Precio:</strong> $${producto.precio}</p>
-      <p><strong>Stock:</strong> ${stock > 0 ? stock : 'Sin stock'}</p>
     `;
     contenedor.appendChild(div);
   });

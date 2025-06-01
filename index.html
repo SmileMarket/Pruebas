@@ -6,14 +6,102 @@
   <title>SmileMarket</title>
   <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: "Comic Neue", cursive; padding: 2rem; background: #f5f5f5; }
-    .producto { background: white; border-radius: 8px; padding: 1rem; margin: 1rem 0; box-shadow: 0 0 5px #ccc; }
-    .producto h3 { margin: 0 0 0.5rem; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Comic Neue", cursive;
+      font-weight: 700;
+      margin: 0; padding: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background: #f7b0f7;
+      color: fuchsia;
+      padding: 1rem 2rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    #buscador-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    #buscador {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      width: 80%;
+      max-width: 300px;
+      font-size: 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .grupo-categoria h2 {
+      font-size: 1.4rem;
+      color: #007b7f;
+      border-bottom: 2px solid #f5a2f5;
+      padding-bottom: 0.3rem;
+    }
+    .productos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .producto {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .producto img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    .producto h3 {
+      font-size: 1.1rem;
+      margin: 0 0 0.3rem 0;
+      text-align: center;
+    }
+    .precio {
+      color: #f500b5;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+    .sin-stock-label {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(255,0,0,0.85);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>SmileMarket</h1>
-  <div id="productos"></div>
+  <header>
+    <img src="img/Logo.jpg" alt="Logo SmileMarket" style="max-width: 200px;" />
+    <div id="buscador-container">
+      <input type="text" id="buscador" placeholder="Buscar productos..." />
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="productos"></div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="productos.js"></script>
