@@ -9,16 +9,19 @@ function intentarRenderizar() {
 }
 
 function cargarStockDesdeGoogleSheet() {
-  Tabletop.init({
-    key: '1xWB7Wy37IGoWWnXuA7QVCPCbgHSxgNQKk_FQerbamFQ',
-    simpleSheet: true,
-    callback: function(data) {
+  Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=0&single=true&output=csv", {
+    download: true,
+    header: true,
+    complete: function(results) {
       stockData = {};
-      data.forEach(item => {
+      results.data.forEach(item => {
         stockData[item.nombre] = parseInt(item.stock);
       });
       stockCargado = true;
       intentarRenderizar();
+    },
+    error: function(err) {
+      console.error("Error cargando CSV:", err);
     }
   });
 }
