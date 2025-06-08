@@ -1,30 +1,27 @@
-// === Variables globales de control ===
-let stockData = {};
-let productosCargados = false;
-let stockCargado = false;
-
-function intentarRenderizar() {
-  if (stockCargado && productosCargados) {
-    renderizarProductos();
-  }
-}
-
-function cargarStockDesdeGoogleSheet() {
-  Tabletop.init({
-    key: '1xWB7Wy37IGoWWnXuA7QVCPCbgHSxgNQKk_FQerbamFQ',
-    simpleSheet: true,
-    callback: function(data) {
-      stockData = {};
-      data.forEach(item => {
-        stockData[item.nombre] = parseInt(item.stock);
-      });
-      stockCargado = true;
-      intentarRenderizar();
-    }
-  });
-}
 
 const carrito = [];
+
+async function cargarStockDesdeGoogleSheet() {
+  const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=0&single=true&output=csv';
+
+  const response = await fetch(urlCSV);
+  const texto = await response.text();
+  const lineas = texto.split('\n');
+  const headers = lineas[0].split(',').map(h => h.trim());
+
+  const stockData = {};
+  for (let i = 1; i < lineas.length; i++) {
+    const columnas = lineas[i].split(',').map(c => c.trim());
+    const fila = Object.fromEntries(headers.map((h, j) => [h, columnas[j]]));
+    const nombre = fila.nombre?.trim();
+    const stock = parseInt(fila.stock);
+    if (nombre) stockData[nombre] = isNaN(stock) ? 0 : stock;
+  }
+
+  productos.forEach(p => {
+    p.stock = stockData[p.nombre] ?? 0;
+  });
+}
 
 function agregarAlCarrito(boton) {
   const producto = boton.closest('.producto');
@@ -97,18 +94,10 @@ function cerrarModalInfo() {
   document.getElementById('info-modal').style.display = 'none';
 }
 
-function agregarRecomendaciones(productoElement, recomendacionesArray) {
-  if (!productoElement || !Array.isArray(recomendacionesArray)) return;
-  const recomendacionesDiv = document.createElement('div');
-  recomendacionesDiv.className = 'recomendaciones';
-  const contenido = recomendacionesArray.map(item => `<li>${item}</li>`).join('');
-  recomendacionesDiv.innerHTML = `<strong>Recomendado:</strong><ul style="padding-left: 1.2rem; margin: 0.3rem 0;">${contenido}</ul>`;
-  productoElement.appendChild(recomendacionesDiv);
-}
+document.addEventListener('DOMContentLoaded', async () => {
+  await cargarStockDesdeGoogleSheet();
 
-function renderizarProductos() {
   const contenedor = document.getElementById('productos');
-  contenedor.innerHTML = '';
   const productosPorCategoria = {};
 
   productos.forEach(producto => {
@@ -119,22 +108,12 @@ function renderizarProductos() {
     productosPorCategoria[categoria].push(producto);
   });
 
-  const recomendacionesPorProducto = {
-    'Lima K Acero #15 25mm C/U': ['Organizador', 'Caja Mini Endo 72', 'Punta P1 de cavitador'],
-    'Turbina con luz de LED': ['Micromotor neumático', 'Contra ángulo', 'Kit NSK Violeta'],
-    'Kit de cirugía E': ['Campo fenestrado adicional', 'Tubuladura plástica x 100'],
-    'Microbrush': ['Pinceles de silicona', 'Organizador'],
-    'Kit NSK Violeta': ['Limas K', 'Caja mini endo', 'Lubricante de piezas de mano'],
-    'Endo Z - EN PROMO!': ['Limas H', 'Organizador', 'Caja esterilizadora']
-  };
-
   for (const categoria in productosPorCategoria) {
     const grupo = document.createElement('div');
     grupo.className = 'grupo-categoria';
 
     const titulo = document.createElement('h2');
     titulo.textContent = categoria;
-    titulo.id = `cat-${categoria.toLowerCase().replace(/\s+/g, '-')}`;
     grupo.appendChild(titulo);
 
     const contenedorCategoria = document.createElement('div');
@@ -148,46 +127,25 @@ function renderizarProductos() {
       div.dataset.descripcion = producto.descripcion || '';
       div.dataset.categoria = producto.categoria || '';
 
-      const imagenHTML = producto.imagen ? `
-        <div class="producto-imagen-container" style="position:relative" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
-          <img src="${producto.imagen}" alt="${producto.nombre}" 
-               onerror="this.src='img/placeholder.jpg';" 
-               style="max-width:100%; height:auto; margin-bottom:10px;" />
-          <div class="info-overlay">+ info</div>
-        </div>` : '';
-
       div.innerHTML = `
-        ${imagenHTML}
+        ${producto.imagen ? `
+          <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
+            <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
+            ${producto.stock <= 0 ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>' : '<div class="info-overlay">+ info</div>'}
+          </div>
+        ` : ''}
         <h3>${producto.nombre}</h3>
-        <p class="categoria-texto">${producto.categoria}</p>
+        <p class="categoria-texto" style="margin: 0 0 0.3rem 0; font-size: 0.9rem; color: #555;">${producto.categoria}</p>
         <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
-          <button class="menos" onclick="cambiarCantidad(this, -1)">−</button>
+          <button class="menos" onclick="cambiarCantidad(this, -1)" ${producto.stock <= 0 ? 'disabled' : ''}>−</button>
           <input class="cantidad-input" type="number" value="1" min="1" readonly />
-          <button class="mas" onclick="cambiarCantidad(this, 1)">+</button>
+          <button class="mas" onclick="cambiarCantidad(this, 1)" ${producto.stock <= 0 ? 'disabled' : ''}>+</button>
         </div>
-        <button class="boton" onclick="agregarAlCarrito(this)">Agregar al carrito</button>
+        <button class="boton" onclick="agregarAlCarrito(this)" ${producto.stock <= 0 ? 'disabled style="background:#ccc;cursor:not-allowed;"' : ''}>
+          ${producto.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}
+        </button>
       `;
-
-      const recomendaciones = recomendacionesPorProducto[producto.nombre];
-      if (recomendaciones) {
-        agregarRecomendaciones(div, recomendaciones);
-      }
-
-      // Stock check
-      const stock = stockData[producto.nombre] ?? 99;
-      const imagenContenedor = div.querySelector('.producto-imagen-container');
-      if (stock === 0 && imagenContenedor) {
-        const overlay = document.createElement('div');
-        overlay.textContent = 'SIN STOCK';
-        overlay.style = 'position:absolute;top:8px;left:8px;background:red;color:white;padding:4px 8px;border-radius:4px;font-weight:bold;';
-        imagenContenedor.appendChild(overlay);
-
-        const boton = div.querySelector('.boton');
-        boton.disabled = true;
-        boton.style.opacity = '0.5';
-        boton.textContent = 'Sin stock';
-      }
 
       contenedorCategoria.appendChild(div);
     });
@@ -195,47 +153,4 @@ function renderizarProductos() {
     grupo.appendChild(contenedorCategoria);
     contenedor.appendChild(grupo);
   }
-
-  const inputBuscador = document.getElementById('buscador');
-  inputBuscador.addEventListener('input', () => {
-    const termino = inputBuscador.value.trim().toLowerCase();
-    const productosDOM = document.querySelectorAll('.producto');
-
-    if (termino === '') {
-      productosDOM.forEach(producto => {
-        producto.style.display = '';
-        const nombreElem = producto.querySelector('h3');
-        const categoriaElem = producto.querySelector('.categoria-texto');
-        nombreElem.innerHTML = producto.dataset.nombre;
-        categoriaElem.innerHTML = producto.dataset.categoria;
-      });
-      return;
-    }
-
-    productosDOM.forEach(producto => {
-      const nombre = producto.dataset.nombre.toLowerCase();
-      const descripcion = (producto.dataset.descripcion || '').toLowerCase();
-      const categoria = (producto.dataset.categoria || '').toLowerCase();
-      const coincide = nombre.includes(termino) || descripcion.includes(termino) || categoria.includes(termino);
-
-      if (coincide) {
-        producto.style.display = '';
-        const nombreElem = producto.querySelector('h3');
-        const categoriaElem = producto.querySelector('.categoria-texto');
-        nombreElem.innerHTML = producto.dataset.nombre;
-        categoriaElem.innerHTML = producto.dataset.categoria;
-        const terminoRegex = new RegExp(`(${termino})`, 'gi');
-        const nombreResaltado = producto.dataset.nombre.replace(terminoRegex, '<mark style="background-color: #f7b0f7;">$1</mark>');
-        const categoriaResaltada = producto.dataset.categoria.replace(terminoRegex, '<mark style="background-color: #f7b0f7;">$1</mark>');
-        nombreElem.innerHTML = nombreResaltado;
-        categoriaElem.innerHTML = categoriaResaltada;
-      } else {
-        producto.style.display = 'none';
-      }
-    });
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  cargarStockDesdeGoogleSheet();
 });
