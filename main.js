@@ -181,28 +181,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   const confirmarBtn = document.getElementById('confirmar');
   if (confirmarBtn) {
     confirmarBtn.addEventListener('click', () => {
-      if (carrito.length === 0) {
-        alert('Tu carrito está vacío.');
-        return;
-      }
+  if (carrito.length === 0) {
+    alert('Tu carrito está vacío.');
+    return;
+  }
 
-      const resumen = document.getElementById('resumen-contenido');
-      resumen.innerHTML = '';
-      let mensaje = 'Hola! Quiero realizar una compra:\\n';
-      let total = 0;
+  const resumen = document.getElementById('resumen-contenido');
+  resumen.innerHTML = '';
+  let mensaje = 'Hola! Quiero realizar una compra:%0A';
+  let total = 0;
 
-      carrito.forEach(item => {
-        const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
-        resumen.innerHTML += `<div>${linea}</div>`;
-        mensaje += `• ${linea}\\n`;
-        total += item.precio * item.cantidad;
-      });
+  carrito.forEach(item => {
+    const linea = `• ${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
+    resumen.innerHTML += `<div>${linea}</div>`;
+    mensaje += `${linea}%0A`;
+    total += item.precio * item.cantidad;
+  });
 
-      mensaje += `\\nTotal: $${total.toLocaleString()}`;
-      resumen.innerHTML += `<div style="margin-top:1rem;font-weight:bold;">Total: $${total.toLocaleString()}</div>`;
+  mensaje += `%0A*Total: $${total.toLocaleString()}*`;
+  document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
+  document.getElementById('resumen-modal').style.display = 'flex';
+});
 
-      document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
-      document.getElementById('resumen-modal').style.display = 'flex';
-    });
   }
 });
