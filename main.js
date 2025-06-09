@@ -1,3 +1,4 @@
+
 const carrito = [];
 
 async function cargarStockDesdeGoogleSheet() {
@@ -74,6 +75,7 @@ function mostrarPopup() {
     popup.style.display = 'none';
   }, 1000);
 }
+
 function cambiarCantidad(boton, delta) {
   const input = boton.parentElement.querySelector('.cantidad-input');
   let cantidad = parseInt(input.value) || 1;
@@ -125,25 +127,30 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.dataset.descripcion = producto.descripcion || '';
       div.dataset.categoria = producto.categoria || '';
 
-      div.innerHTML = \`
-        \${producto.imagen ? \`
-          <div class="producto-imagen-container" onclick="mostrarModalInfo('\${producto.nombre}', \\\`\${producto.descripcion || 'Sin descripción disponible'}\\\`)">
-            <img src="\${producto.imagen}" alt="\${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
-            \${producto.stock <= 0 ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>' : '<div class="info-overlay">+ info</div>'}
+      let imagenHTML = "";
+      if (producto.imagen) {
+        imagenHTML = `
+          <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
+            <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
+            ${producto.stock <= 0 ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>' : '<div class="info-overlay">+ info</div>'}
           </div>
-        \` : ''}
-        <h3>\${producto.nombre}</h3>
-        <p class="categoria-texto">\${producto.categoria}</p>
-        <p class="precio">$ \${producto.precio.toLocaleString("es-AR")},00</p>
+        `;
+      }
+
+      div.innerHTML = `
+        ${imagenHTML}
+        <h3>${producto.nombre}</h3>
+        <p class="categoria-texto">${producto.categoria}</p>
+        <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
-          <button class="menos" onclick="cambiarCantidad(this, -1)" \${producto.stock <= 0 ? 'disabled' : ''}>−</button>
+          <button class="menos" onclick="cambiarCantidad(this, -1)" ${producto.stock <= 0 ? 'disabled' : ''}>−</button>
           <input class="cantidad-input" type="number" value="1" min="1" readonly />
-          <button class="mas" onclick="cambiarCantidad(this, 1)" \${producto.stock <= 0 ? 'disabled' : ''}>+</button>
+          <button class="mas" onclick="cambiarCantidad(this, 1)" ${producto.stock <= 0 ? 'disabled' : ''}>+</button>
         </div>
-        <button class="boton" onclick="agregarAlCarrito(this)" \${producto.stock <= 0 ? 'disabled style="background:#ccc;cursor:not-allowed;"' : ''}>
-          \${producto.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}
+        <button class="boton" onclick="agregarAlCarrito(this)" ${producto.stock <= 0 ? 'disabled style="background:#ccc;cursor:not-allowed;"' : ''}>
+          ${producto.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}
         </button>
-      \`;
+      `;
 
       contenedorCategoria.appendChild(div);
     });
@@ -152,26 +159,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  // Crear modal de resumen
+  // Modal resumen y confirmación por WhatsApp
   const modal = document.createElement('div');
   modal.id = 'resumen-modal';
   modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:1000;display:none;justify-content:center;align-items:center;';
-  modal.innerHTML = \`
+  modal.innerHTML = `
     <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:400px;">
       <h2>Resumen de tu pedido</h2>
       <div id="resumen-contenido" style="margin-bottom:1rem;"></div>
       <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
       <button id="cancelar-resumen" class="boton" style="background:#ccc;color:#333;">Cancelar</button>
     </div>
-  \`;
+  `;
   document.body.appendChild(modal);
 
   modal.querySelector('#cancelar-resumen').onclick = () => {
     modal.style.display = 'none';
   };
+
   modal.querySelector('#enviar-whatsapp').onclick = () => {
     const mensaje = modal.querySelector('#enviar-whatsapp').dataset.mensaje;
-    const numeroWhatsApp = '5491130335334'; // Cambiá si querés usar otro número
+    const numeroWhatsApp = '5491130335334';
     const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
     modal.style.display = 'none';
