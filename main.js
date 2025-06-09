@@ -1,4 +1,3 @@
-
 const carrito = [];
 
 async function cargarStockDesdeGoogleSheet() {
@@ -14,8 +13,8 @@ async function cargarStockDesdeGoogleSheet() {
     const columnas = lineas[i].split(',').map(c => c.trim());
     const fila = Object.fromEntries(headers.map((h, j) => [h, columnas[j]]));
     const nombre = fila.nombre?.trim();
-    const stock = parseInt(fila.stock);
-    if (nombre) stockData[nombre] = isNaN(stock) ? 0 : stock;
+    const stock = Number(fila.stock?.trim().replace(",", "."));
+    stockData[nombre] = isNaN(stock) ? 0 : stock;
   }
 
   productos.forEach(p => {
@@ -75,7 +74,6 @@ function mostrarPopup() {
     popup.style.display = 'none';
   }, 1000);
 }
-
 function cambiarCantidad(boton, delta) {
   const input = boton.parentElement.querySelector('.cantidad-input');
   let cantidad = parseInt(input.value) || 1;
@@ -135,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
         ` : ''}
         <h3>${producto.nombre}</h3>
-        <p class="categoria-texto" style="margin: 0 0 0.3rem 0; font-size: 0.9rem; color: #555;">${producto.categoria}</p>
+        <p class="categoria-texto">${producto.categoria}</p>
         <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
           <button class="menos" onclick="cambiarCantidad(this, -1)" ${producto.stock <= 0 ? 'disabled' : ''}>−</button>
@@ -152,5 +150,59 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     grupo.appendChild(contenedorCategoria);
     contenedor.appendChild(grupo);
+  }
+
+  // Modal WhatsApp
+  const modal = document.createElement('div');
+  modal.id = 'resumen-modal';
+  modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:1000;display:none;justify-content:center;align-items:center;';
+  modal.innerHTML = `
+    <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:400px;">
+      <h2>Resumen de tu pedido</h2>
+      <div id="resumen-contenido" style="margin-bottom:1rem;"></div>
+      <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
+      <button id="cancelar-resumen" class="boton" style="background:#ccc;color:#333;">Cancelar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#cancelar-resumen').onclick = () => {
+    modal.style.display = 'none';
+  };
+
+  modal.querySelector('#enviar-whatsapp').onclick = () => {
+    const mensaje = modal.querySelector('#enviar-whatsapp').dataset.mensaje;
+    const numeroWhatsApp = '5491130335334'; // Cambiar si se necesita
+    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+    modal.style.display = 'none';
+  };
+
+  const confirmarBtn = document.getElementById('confirmar');
+  if (confirmarBtn) {
+    confirmarBtn.addEventListener('click', () => {
+      if (carrito.length === 0) {
+        alert('Tu carrito está vacío.');
+        return;
+      }
+
+      const resumen = document.getElementById('resumen-contenido');
+      resumen.innerHTML = '';
+      let mensaje = 'Hola! Quiero realizar una compra:\\n';
+      let total = 0;
+
+      carrito.forEach(item => {
+        const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
+        resumen.innerHTML += `<div>${linea}</div>`;
+        mensaje += `• ${linea}\\n`;
+        total += item.precio * item.cantidad;
+      });
+
+      mensaje += `\\nTotal: $${total.toLocaleString()}`;
+      resumen.innerHTML += `<div style="margin-top:1rem;font-weight:bold;">Total: $${total.toLocaleString()}</div>`;
+
+      document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
+      document.getElementById('resumen-modal').style.display = 'flex';
+    });
   }
 });
