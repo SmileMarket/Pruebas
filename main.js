@@ -181,7 +181,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  // === Modal resumen para WhatsApp ===
   const modal = document.createElement('div');
   modal.id = 'resumen-modal';
   modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:1000;display:none;justify-content:center;align-items:center;';
@@ -239,22 +238,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // === Buscador ===
+  // Mostrar/ocultar el carrito al hacer clic en el ícono flotante
+  const carritoIcono = document.getElementById('carrito-icono');
+  carritoIcono.addEventListener('click', (e) => {
+    e.preventDefault();
+    const carrito = document.getElementById('carrito');
+    carrito.style.display = (carrito.style.display === 'none' || carrito.style.display === '') ? 'block' : 'none';
+  });
+
+  // Buscador
   const inputBuscador = document.getElementById('buscador');
   inputBuscador.addEventListener('input', () => {
     const termino = inputBuscador.value.trim().toLowerCase();
     const productosDOM = document.querySelectorAll('.producto');
-
-    if (termino === '') {
-      productosDOM.forEach(producto => {
-        producto.style.display = '';
-        const nombreElem = producto.querySelector('h3');
-        const categoriaElem = producto.querySelector('.categoria-texto');
-        nombreElem.innerHTML = producto.dataset.nombre;
-        categoriaElem.innerHTML = producto.dataset.categoria;
-      });
-      return;
-    }
 
     productosDOM.forEach(producto => {
       const nombre = producto.dataset.nombre.toLowerCase();
@@ -267,17 +263,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (coincide) {
         producto.style.display = '';
-        const terminoRegex = new RegExp(`(${termino})`, 'gi');
-        nombreElem.innerHTML = producto.dataset.nombre.replace(terminoRegex, '<mark>$1</mark>');
-        categoriaElem.innerHTML = producto.dataset.categoria.replace(terminoRegex, '<mark>$1</mark>');
+        const regex = new RegExp(`(${termino})`, 'gi');
+        nombreElem.innerHTML = producto.dataset.nombre.replace(regex, '<mark>$1</mark>');
+        categoriaElem.innerHTML = producto.dataset.categoria.replace(regex, '<mark>$1</mark>');
       } else {
         producto.style.display = 'none';
       }
     });
-document.getElementById('carrito-icono').addEventListener('click', (e) => {
-  e.preventDefault();
-  const carrito = document.getElementById('carrito');
-  carrito.style.display = (carrito.style.display === 'none') ? 'block' : 'none';
-});
   });
 });
