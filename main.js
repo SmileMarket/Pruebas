@@ -1,4 +1,3 @@
-
 const carrito = [];
 
 async function cargarStockDesdeGoogleSheet() {
@@ -127,12 +126,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.dataset.descripcion = producto.descripcion || '';
       div.dataset.categoria = producto.categoria || '';
 
+      let etiquetasHTML = '';
+      if (producto.stock <= 0) etiquetasHTML += '<div>⛔ Sin stock</div>';
+      else etiquetasHTML += '<div>🛈 + info</div>';
+      if (producto.nuevo) etiquetasHTML += '<div>🆕 Nuevo</div>';
+      if (producto.masVendido) etiquetasHTML += '<div>🔥 Muy vendido</div>';
+      if (producto.recomendado) etiquetasHTML += '<div>⭐ Recomendado</div>';
+
       let imagenHTML = "";
       if (producto.imagen) {
         imagenHTML = `
           <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
             <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
-            ${producto.stock <= 0 ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>' : '<div class="info-overlay">+ info</div>'}
+            <div class="info-overlay">${etiquetasHTML}</div>
           </div>
         `;
       }
@@ -159,7 +165,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  // Modal resumen y confirmación por WhatsApp
   const modal = document.createElement('div');
   modal.id = 'resumen-modal';
   modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:1000;display:none;justify-content:center;align-items:center;';
