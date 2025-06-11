@@ -145,10 +145,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       div.innerHTML = `
         ${imagenHTML}
-        <h3 style='margin-bottom: 2px; font-size: 1rem;'>${producto.nombre}</h3>
-        <div class="etiquetas" style="margin-bottom: 2px; gap: 2px;">${etiquetasHTML}</div>
-        <p class="categoria-texto" style="margin-bottom: 2px; font-size: 0.85rem;">${producto.categoria}</p>
-        <p class="precio" style="margin-bottom: 4px; font-size: 0.95rem;">$ ${producto.precio.toLocaleString("es-AR")},00</p>
+        <h3 style='margin: 2px 0; font-size: 1rem;'>${producto.nombre}</h3>
+        <div class="etiquetas" style="margin: 2px 0; gap: 2px;">${etiquetasHTML}</div>
+        <p class="categoria-texto" style="margin: 2px 0; font-size: 0.85rem;">${producto.categoria}</p>
+        <p class="precio" style="margin: 2px 0; font-size: 0.95rem;">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
           <button class="menos" onclick="cambiarCantidad(this, -1)" ${producto.stock <= 0 ? 'disabled' : ''}>−</button>
           <input class="cantidad-input" type="number" value="1" min="1" readonly />
