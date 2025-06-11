@@ -36,6 +36,7 @@ function agregarAlCarrito(boton) {
   }
 
   mostrarPopup();
+  animarCarrito();
   actualizarCarrito();
 }
 
@@ -91,6 +92,14 @@ function mostrarModalInfo(nombre, descripcion) {
 
 function cerrarModalInfo() {
   document.getElementById('info-modal').style.display = 'none';
+}
+
+function animarCarrito() {
+  const icono = document.querySelector('.carrito-float');
+  if (icono) {
+    icono.classList.add('vibrar');
+    setTimeout(() => icono.classList.remove('vibrar'), 500);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

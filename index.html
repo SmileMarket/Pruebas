@@ -341,6 +341,17 @@
   z-index: 3;
   text-align: center;
 }
+@keyframes vibrar {
+  0% { transform: translate(0); }
+  25% { transform: translate(-2px, 2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-2px, 2px); }
+  100% { transform: translate(0); }
+}
+
+.vibrar {
+  animation: vibrar 0.3s ease;
+}
 
   </style>
 </head>
