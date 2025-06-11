@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.innerHTML = `
         ${imagenHTML}
         <h3>${producto.nombre}</h3>
+        <div class="etiquetas">${etiquetasHTML}</div>
         <p class="categoria-texto">${producto.categoria}</p>
         <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
