@@ -70,10 +70,12 @@ function actualizarCarrito() {
 
 function mostrarPopup() {
   const popup = document.getElementById('popup');
-  popup.style.display = 'block';
-  setTimeout(() => {
-    popup.style.display = 'none';
-  }, 1000);
+  if (popup) {
+    popup.style.display = 'block';
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 1000);
+  }
 }
 
 function cambiarCantidad(boton, delta) {
@@ -178,43 +180,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     grupo.appendChild(contenedorCategoria);
     contenedor.appendChild(grupo);
   }
-});
-  // Modal dinámico para WhatsApp
-  if (!document.getElementById('resumen-modal')) {
-    const modal = document.createElement('div');
-    modal.id = 'resumen-modal';
-    modal.style.position = 'fixed';
-    modal.style.top = '0';
-    modal.style.left = '0';
-    modal.style.width = '100%';
-    modal.style.height = '100%';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    modal.style.zIndex = '10000';
+
+  // === Modal resumen para WhatsApp ===
+  const modal = document.createElement('div');
+  modal.id = 'resumen-modal';
+  modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:1000;display:none;justify-content:center;align-items:center;';
+  modal.innerHTML = `
+    <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:400px;">
+      <h2>Resumen de tu pedido</h2>
+      <div id="resumen-contenido" style="margin-bottom:1rem;"></div>
+      <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
+      <button id="cancelar-resumen" class="boton" style="background:#ccc;color:#333;">Cancelar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById('cancelar-resumen').onclick = () => {
     modal.style.display = 'none';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-    modal.innerHTML = `
-      <div style="background:white; padding:20px; border-radius:6px; max-width:400px; width:100%">
-        <h2>Resumen de tu pedido</h2>
-        <div id="resumen-contenido" style="margin-bottom: 1rem;"></div>
-        <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
-        <button id="cancelar-resumen" class="boton" style="background:#ccc; color:#333">Cancelar</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
+  };
 
-    modal.querySelector('#enviar-whatsapp').addEventListener('click', () => {
-      const mensaje = modal.querySelector('#enviar-whatsapp').dataset.mensaje || '';
-      const numeroWhatsApp = '5491130335334';
-      const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-      window.open(url, '_blank');
-      modal.style.display = 'none';
-    });
-
-    modal.querySelector('#cancelar-resumen').addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
-  }
+  document.getElementById('enviar-whatsapp').onclick = () => {
+    const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
+    const numeroWhatsApp = '5491130335334';
+    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+    modal.style.display = 'none';
+  };
 
   const confirmarBtn = document.getElementById('confirmar');
   if (confirmarBtn) {
@@ -249,50 +240,39 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // === Buscador ===
-const inputBuscador = document.getElementById('buscador');
+  const inputBuscador = document.getElementById('buscador');
+  inputBuscador.addEventListener('input', () => {
+    const termino = inputBuscador.value.trim().toLowerCase();
+    const productosDOM = document.querySelectorAll('.producto');
 
-inputBuscador.addEventListener('input', () => {
-  const termino = inputBuscador.value.trim().toLowerCase();
-
-  const productosDOM = document.querySelectorAll('.producto');
-
-  if (termino === '') {
-    productosDOM.forEach(producto => {
-      producto.style.display = '';
-      const nombreElem = producto.querySelector('h3');
-      const categoriaElem = producto.querySelector('.categoria-texto');
-      nombreElem.innerHTML = producto.dataset.nombre;
-      categoriaElem.innerHTML = producto.dataset.categoria;
-    });
-    return; // 👈 Esto es clave para que no siga y evite el resaltado vacío
-  }
-
-  productosDOM.forEach(producto => {
-    const nombre = producto.dataset.nombre.toLowerCase();
-    const descripcion = (producto.dataset.descripcion || '').toLowerCase();
-    const categoria = (producto.dataset.categoria || '').toLowerCase();
-
-    const coincide = nombre.includes(termino) || descripcion.includes(termino) || categoria.includes(termino);
-
-    if (coincide) {
-      producto.style.display = '';
-
-      const nombreElem = producto.querySelector('h3');
-      const categoriaElem = producto.querySelector('.categoria-texto');
-
-      nombreElem.innerHTML = producto.dataset.nombre;
-      categoriaElem.innerHTML = producto.dataset.categoria;
-
-      const terminoRegex = new RegExp(`(${termino})`, 'gi');
-
-      const nombreResaltado = producto.dataset.nombre.replace(terminoRegex, '<mark style="background-color: #f7b0f7;">$1</mark>');
-      const categoriaResaltada = producto.dataset.categoria.replace(terminoRegex, '<mark style="background-color: #f7b0f7;">$1</mark>');
-
-      nombreElem.innerHTML = nombreResaltado;
-      categoriaElem.innerHTML = categoriaResaltada;
-    } else {
-      producto.style.display = 'none';
+    if (termino === '') {
+      productosDOM.forEach(producto => {
+        producto.style.display = '';
+        const nombreElem = producto.querySelector('h3');
+        const categoriaElem = producto.querySelector('.categoria-texto');
+        nombreElem.innerHTML = producto.dataset.nombre;
+        categoriaElem.innerHTML = producto.dataset.categoria;
+      });
+      return;
     }
+
+    productosDOM.forEach(producto => {
+      const nombre = producto.dataset.nombre.toLowerCase();
+      const descripcion = (producto.dataset.descripcion || '').toLowerCase();
+      const categoria = (producto.dataset.categoria || '').toLowerCase();
+      const coincide = nombre.includes(termino) || descripcion.includes(termino) || categoria.includes(termino);
+
+      const nombreElem = producto.querySelector('h3');
+      const categoriaElem = producto.querySelector('.categoria-texto');
+
+      if (coincide) {
+        producto.style.display = '';
+        const terminoRegex = new RegExp(`(${termino})`, 'gi');
+        nombreElem.innerHTML = producto.dataset.nombre.replace(terminoRegex, '<mark>$1</mark>');
+        categoriaElem.innerHTML = producto.dataset.categoria.replace(terminoRegex, '<mark>$1</mark>');
+      } else {
+        producto.style.display = 'none';
+      }
+    });
   });
 });
-
