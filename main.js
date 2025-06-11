@@ -1,4 +1,3 @@
-
 const carrito = [];
 
 async function cargarStockDesdeGoogleSheet() {
@@ -166,65 +165,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     grupo.appendChild(contenedorCategoria);
     contenedor.appendChild(grupo);
-  }
-});
-
-    grupo.appendChild(contenedorCategoria);
-    contenedor.appendChild(grupo);
-  }
-
-  // Modal resumen y confirmación por WhatsApp
-  const modal = document.createElement('div');
-  modal.id = 'resumen-modal';
-  modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:1000;display:none;justify-content:center;align-items:center;';
-  modal.innerHTML = `
-    <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:400px;">
-      <h2>Resumen de tu pedido</h2>
-      <div id="resumen-contenido" style="margin-bottom:1rem;"></div>
-      <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
-      <button id="cancelar-resumen" class="boton" style="background:#ccc;color:#333;">Cancelar</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  modal.querySelector('#cancelar-resumen').onclick = () => {
-    modal.style.display = 'none';
-  };
-
-  modal.querySelector('#enviar-whatsapp').onclick = () => {
-    const mensaje = modal.querySelector('#enviar-whatsapp').dataset.mensaje;
-    const numeroWhatsApp = '5491130335334';
-    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-    modal.style.display = 'none';
-  };
-
-  const confirmarBtn = document.getElementById('confirmar');
-  if (confirmarBtn) {
-    confirmarBtn.addEventListener('click', () => {
-      if (carrito.length === 0) {
-        alert('Tu carrito está vacío.');
-        return;
-      }
-
-      const resumen = document.getElementById('resumen-contenido');
-      resumen.innerHTML = '';
-      let mensaje = 'Hola! Quiero realizar una compra:\n';
-      let total = 0;
-
-      carrito.forEach(item => {
-        const linea = `• ${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
-        resumen.innerHTML += `<div>${linea}</div>`;
-        mensaje += `${linea}\n`;
-        total += item.precio * item.cantidad;
-      });
-
-      const totalTexto = `Total: $${total.toLocaleString()}`;
-      resumen.innerHTML += `<div style="margin-top:1rem;font-weight:bold;">${totalTexto}</div>`;
-      mensaje += `\n${totalTexto}`;
-
-      document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
-      document.getElementById('resumen-modal').style.display = 'flex';
-    });
   }
 });
