@@ -126,19 +126,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.dataset.descripcion = producto.descripcion || '';
       div.dataset.categoria = producto.categoria || '';
 
-      let etiquetasHTML = '';
-      if (producto.stock <= 0) etiquetasHTML += '<div>⛔ Sin stock</div>';
-      else etiquetasHTML += '<div>🛈 + info</div>';
-      if (producto.nuevo) etiquetasHTML += '<div>🆕 Nuevo</div>';
-      if (producto.masVendido) etiquetasHTML += '<div>🔥 Muy vendido</div>';
-      if (producto.recomendado) etiquetasHTML += '<div>⭐ Recomendado</div>';
+      const etiquetas = [];
+      if (producto.stock <= 0) etiquetas.push('⛔ Sin stock');
+      if (producto.nuevo) etiquetas.push('🆕 Nuevo');
+      if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
+      if (producto.recomendado) etiquetas.push('⭐ Recomendado');
+
+      const etiquetasHTML = etiquetas.map(texto => `<span class="etiqueta">${texto}</span>`).join('');
 
       let imagenHTML = "";
       if (producto.imagen) {
         imagenHTML = `
           <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
+            <div class="etiquetas-sobre-imagen">${etiquetasHTML}</div>
             <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
-            <div class="info-overlay">${etiquetasHTML}</div>
           </div>
         `;
       }
