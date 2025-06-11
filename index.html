@@ -398,6 +398,42 @@
   transform: scale(1.1);
 }
 
+.whatsapp-float,
+.carrito-float,
+.instagram-float {
+  position: fixed;
+  right: 15px;
+  z-index: 998;
+  background-color: white;
+  border: 2px solid #ccc;
+  padding: 10px;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s;
+}
+
+.whatsapp-float {
+  top: calc(50% - 60px);
+  background-color: #25d366;
+  color: white;
+}
+
+.instagram-float {
+  top: calc(50% + 60px);
+  border-color: #E1306C;
+}
+
+.carrito-float {
+  top: 50%;
+  transform: translateY(-50%);
+  border-color: #007b7f;
+}
+
 
   </style>
 </head>
@@ -462,6 +498,16 @@
        width="40" 
        height="40" 
        style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));" />
+</a>
+
+<a href="https://www.instagram.com/smilemarket.ar?igsh=MXc4bHZoMXYxaHpuNQ==" 
+   target="_blank" 
+   class="instagram-float" 
+   title="Instagram">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" 
+       alt="Instagram" 
+       width="24" 
+       height="24" />
 </a>
 
 </body>
