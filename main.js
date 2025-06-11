@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const etiquetas = [];
       let sinStockEtiqueta = '';
       if (producto.stock <= 0) {
-        sinStockEtiqueta = `<div class="sin-stock-overlay">⛔ SIN STOCK</div>`;
+        sinStockEtiqueta = `<div class=\"sin-stock-overlay\">⛔ SIN&nbsp;STOCK</div>`;
       }
       if (producto.nuevo) etiquetas.push('🆕 Nuevo');
       if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
