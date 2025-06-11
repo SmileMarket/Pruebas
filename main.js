@@ -138,7 +138,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (producto.imagen) {
         imagenHTML = `
           <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
-            <div class="etiquetas-sobre-imagen">${etiquetasHTML}</div>
             <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
           </div>
         `;
@@ -146,10 +145,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       div.innerHTML = `
         ${imagenHTML}
-        <h3>${producto.nombre}</h3>
-        <div class="etiquetas">${etiquetasHTML}</div>
-        <p class="categoria-texto">${producto.categoria}</p>
-        <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
+        <h3 style='margin-bottom: 4px;'>${producto.nombre}</h3>
+        <div class="etiquetas" style="margin-bottom: 4px;">${etiquetasHTML}</div>
+        <p class="categoria-texto" style="margin-bottom: 4px;">${producto.categoria}</p>
+        <p class="precio" style="margin-bottom: 6px;">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
           <button class="menos" onclick="cambiarCantidad(this, -1)" ${producto.stock <= 0 ? 'disabled' : ''}>−</button>
           <input class="cantidad-input" type="number" value="1" min="1" readonly />
