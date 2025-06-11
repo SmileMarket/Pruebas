@@ -242,20 +242,25 @@
       font-size: 1rem;
     }
 
-    .whatsapp-float {
-      position: fixed;
-      top: 50%;
-      right: 15px;
-      transform: translateY(-50%);
-      z-index: 999;
-      background-color: #25d366;
-      color: white;
-      padding: 12px;
-      border-radius: 50%;
-      font-size: 24px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      transition: transform 0.3s, background-color 0.3s;
-    }
+.whatsapp-float {
+  position: fixed;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  z-index: 999;
+  background-color: #25d366;
+  color: white;
+  padding: 16px; /* aumentamos de 12px */
+  border-radius: 50%;
+  font-size: 28px; /* aumentamos el tamaño */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.whatsapp-float:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
 
     .carrito-float {
       position: fixed;
@@ -354,24 +359,23 @@
 }
 .instagram-float {
   position: fixed;
-  bottom: 100px;
+  top: calc(50% + 180px); /* más bajo para no tapar el carrito */
   right: 15px;
-  background-color: #E1306C;
-  color: white;
-  padding: 12px;
+  z-index: 998;
+  width: 50px;
+  height: 50px;
+  background-color: white;
   border-radius: 50%;
-  font-size: 24px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-  z-index: 999;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: transform 0.2s ease;
 }
 
 .instagram-float:hover {
-  background-color: #c72c5c;
-  transform: scale(1.05);
+  transform: scale(1.1);
+
 }
 
 .instagram-float {
