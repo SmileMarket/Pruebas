@@ -15,51 +15,193 @@
       color: #333;
     }
 
-    .whatsapp-float,
+    header {
+      background: #f7b0f7;
+      color: fuchsia;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+
+    header img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    #buscador-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    #buscador {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      width: 80%;
+      max-width: 300px;
+      font-size: 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    h2 {
+      border-bottom: 2px solid #f5a2f5;
+      padding-bottom: .3rem;
+      margin-bottom: 1rem;
+      color: #007b7f;
+    }
+
+    .productos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .producto {
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgb(0 0 0 / 0.1);
+      padding: 1rem;
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .producto h3 {
+      font-size: 1.1rem;
+      margin: 0 0 0.3rem 0;
+    }
+
+    .etiquetas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 0.7rem;
+    }
+
+    .etiqueta {
+      background: rgba(247, 176, 247, 0.5);
+      color: #333;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .categoria-texto {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 0.5rem;
+    }
+
+    .precio {
+      color: #f5a2f5;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .control-cantidad {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 0.7rem;
+    }
+
+    .control-cantidad button {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: #ddd;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .control-cantidad input {
+      width: 32px;
+      height: 28px;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .boton {
+      background: #f5a2f5;
+      border: none;
+      color: white;
+      padding: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .boton:hover {
+      background: #e392e3;
+    }
+
+    .producto-imagen-container {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .info-overlay {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: #f7b0f7;
+      color: white;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
     .carrito-float,
+    .whatsapp-float,
     .instagram-float {
       position: fixed;
       right: 15px;
-      z-index: 998;
-      background-color: white;
-      border: 2px solid #ccc;
-      padding: 10px;
-      border-radius: 50%;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
       width: 50px;
       height: 50px;
+      padding: 10px;
+      border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
       transition: transform 0.2s ease;
+      z-index: 998;
+    }
+
+    .carrito-float {
+      top: 50%;
+      background-color: white;
+      border: 2px solid #007b7f;
     }
 
     .whatsapp-float {
       top: calc(50% - 70px);
       background-color: #25d366;
       color: white;
-    }
-
-    .carrito-float {
-      top: 50%;
-      border-color: #007b7f;
+      border: 2px solid #25d366;
     }
 
     .instagram-float {
       top: calc(50% + 70px);
-      border-color: #E1306C;
-    }
-
-    .carrito-float.vibrar {
-      animation: vibrar 0.3s ease;
-    }
-
-    @keyframes vibrar {
-      0% { transform: translate(0); }
-      25% { transform: translate(-2px, 2px); }
-      50% { transform: translate(2px, -2px); }
-      75% { transform: translate(-2px, 2px); }
-      100% { transform: translate(0); }
+      background-color: white;
+      border: 2px solid #E1306C;
     }
 
     .carrito-float svg {
@@ -78,14 +220,53 @@
       border-radius: 999px;
       font-weight: bold;
     }
+
+    .vibrar {
+      animation: vibrar 0.3s ease;
+    }
+
+    @keyframes vibrar {
+      0% { transform: translate(0); }
+      25% { transform: translate(-2px, 2px); }
+      50% { transform: translate(2px, -2px); }
+      75% { transform: translate(-2px, 2px); }
+      100% { transform: translate(0); }
+    }
   </style>
 </head>
 <body>
+  <header>
+    <img src="img/Logo.jpg" alt="Logo SmileMarket" />
+    <div id="buscador-container">
+      <input type="text" id="buscador" placeholder="Buscar productos..." />
+    </div>
+  </header>
 
-  <!-- Íconos flotantes -->
-  <a href="https://wa.me/5491130335334?text=¡Hola!%20Tengo%20una%20consulta: " class="whatsapp-float" target="_blank" title="Escribinos por WhatsApp">💬</a>
+  <div class="container">
+    <h2>Productos</h2>
+    <div id="productos" class="productos"></div>
+  </div>
 
-<a href="#carrito" class="carrito-float" id="carrito-icono" title="Ver carrito">
+  <div id="carrito" style="display:none;">
+    <h2>Carrito</h2>
+    <div id="carrito-items"></div>
+    <div id="total">Total: $0</div>
+    <button id="confirmar">Confirmar compra</button>
+  </div>
+
+  <div id="popup">Producto agregado al carrito</div>
+
+  <div id="info-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:6px; max-width:400px; width:90%; position:relative;">
+      <button onclick="cerrarModalInfo()" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+      <h3 id="modal-titulo"></h3>
+      <p id="modal-descripcion" style="margin-top: 1rem;"></p>
+    </div>
+  </div>
+
+  <a href="https://wa.me/5491130335334?text=¡Hola!%20Tengo%20una%20consulta" class="whatsapp-float" target="_blank" title="Escribinos por WhatsApp">💬</a>
+
+  <a href="#carrito" class="carrito-float" title="Ver carrito" id="carrito-icono">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart">
       <circle cx="9" cy="21" r="1"></circle>
@@ -104,49 +285,8 @@
          width="24" 
          height="24" />
   </a>
-  <header>
-    <img src="img/Logo.jpg" alt="Logo SmileMarket" />
-    <div id="buscador-container">
-      <input type="text" id="buscador" placeholder="Buscar productos..." />
-    </div>
-  </header>
 
-  <div class="container">
-    <h2>Productos</h2>
-    <div id="productos" class="productos"></div>
-  </div>
-
-  <div id="carrito">
-    <h2>Carrito</h2>
-    <div id="carrito-items"></div>
-    <div id="total">Total: $0</div>
-    <button id="confirmar">Confirmar compra</button>
-  </div>
-
-  <div id="popup">Producto agregado al carrito</div>
-
-  <div id="info-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
-    <div style="background:white; padding:20px; border-radius:6px; max-width:400px; width:90%; position:relative;">
-      <button onclick="cerrarModalInfo()" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
-      <h3 id="modal-titulo"></h3>
-      <p id="modal-descripcion" style="margin-top: 1rem;"></p>
-    </div>
-  </div>
-
-  <!-- Scripts -->
   <script src="productos.js"></script>
   <script src="main.js"></script>
-
-  <!-- Función para vibrar el carrito -->
-  <script>
-    function animarCarrito() {
-      const icono = document.getElementById('carrito-icono');
-      if (icono) {
-        icono.classList.add('vibrar');
-        setTimeout(() => icono.classList.remove('vibrar'), 500);
-      }
-    }
-  </script>
-
 </body>
 </html>
