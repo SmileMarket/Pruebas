@@ -258,12 +258,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      transition: transform 0.2s;
-    }
-
-    .carrito-float {
-      top: calc(50% - 70px);
-      border-color: #007b7f;
+      transition: transform 0.2s ease;
     }
 
     .whatsapp-float {
@@ -272,9 +267,26 @@
       color: white;
     }
 
+    .carrito-float {
+      top: calc(50% - 70px);
+      border-color: #007b7f;
+    }
+
     .instagram-float {
       top: calc(50% + 70px);
       border-color: #E1306C;
+    }
+
+    .carrito-float.vibrar {
+      animation: vibrar 0.3s ease;
+    }
+
+    @keyframes vibrar {
+      0% { transform: translate(0); }
+      25% { transform: translate(-2px, 2px); }
+      50% { transform: translate(2px, -2px); }
+      75% { transform: translate(-2px, 2px); }
+      100% { transform: translate(0); }
     }
 
     .carrito-float svg {
@@ -327,7 +339,7 @@
 
   <a href="https://wa.me/5491130335334?text=¡Hola!%20Tengo%20una%20consulta: " class="whatsapp-float" target="_blank" title="Escribinos por WhatsApp">💬</a>
 
-  <a href="#carrito" class="carrito-float" title="Ver carrito">
+  <a href="#carrito" class="carrito-float" title="Ver carrito" id="carrito-icono">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart">
       <circle cx="9" cy="21" r="1"></circle>
@@ -347,7 +359,15 @@
          height="24" />
   </a>
 
-  <script src="productos.js"></script>
-  <script src="main.js"></script>
+  <script>
+    function animarCarrito() {
+      const icono = document.getElementById('carrito-icono');
+      if (icono) {
+        icono.classList.add('vibrar');
+        setTimeout(() => icono.classList.remove('vibrar'), 500);
+      }
+    }
+  </script>
+
 </body>
 </html>
