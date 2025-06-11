@@ -359,43 +359,25 @@
 }
 .instagram-float {
   position: fixed;
-  top: calc(50% + 180px); /* más bajo para no tapar el carrito */
+  top: calc(50% + 60px);
   right: 15px;
   z-index: 998;
-  width: 50px;
-  height: 50px;
   background-color: white;
+  border: 2px solid #E1306C;
+  padding: 10px;
   border-radius: 50%;
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  width: 50px;
+  height: 50px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
+  align-items: center;
+  transition: transform 0.2s;
 }
 
 .instagram-float:hover {
   transform: scale(1.1);
 
-}
-
-.instagram-float {
-  position: fixed;
-  top: calc(50% + 120px); /* más cerca del carrito */
-  right: 15px;
-  z-index: 998;
-  width: 50px;
-  height: 50px;
-  background-color: white;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-
-.instagram-float:hover {
-  transform: scale(1.1);
 }
 
 .whatsapp-float,
