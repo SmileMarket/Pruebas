@@ -274,5 +274,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         producto.style.display = 'none';
       }
     });
+document.getElementById('carrito-icono').addEventListener('click', (e) => {
+  e.preventDefault();
+  const carrito = document.getElementById('carrito');
+  carrito.style.display = (carrito.style.display === 'none') ? 'block' : 'none';
+});
   });
 });
