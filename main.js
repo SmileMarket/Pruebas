@@ -127,7 +127,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.dataset.categoria = producto.categoria || '';
 
       const etiquetas = [];
-      if (producto.stock <= 0) etiquetas.push('⛔ Sin stock');
+      let sinStockEtiqueta = '';
+      if (producto.stock <= 0) {
+        sinStockEtiqueta = `<div class="sin-stock-overlay">⛔ SIN STOCK</div>`;
+      }
       if (producto.nuevo) etiquetas.push('🆕 Nuevo');
       if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
       if (producto.recomendado) etiquetas.push('⭐ Recomendado');
@@ -138,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (producto.imagen) {
         imagenHTML = `
           <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
-            <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
+            ${sinStockEtiqueta}<img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
           </div>
         `;
       }
