@@ -135,12 +135,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.dataset.descripcion = producto.descripcion || '';
       div.dataset.categoria = producto.categoria || '';
 
+      const etiquetas = [];
+      if (producto.nuevo) etiquetas.push('🆕 Nuevo');
+      if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
+      if (producto.recomendado) etiquetas.push('⭐ Recomendado');
+
+      const etiquetasHTML = etiquetas.length > 0
+        ? `<div class="etiquetas">${etiquetas.map(t => `<span class="etiqueta">${t}</span>`).join('')}</div>`
+        : '';
+
       let imagenHTML = "";
       if (producto.imagen) {
         imagenHTML = `
           <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
             <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
-            ${producto.stock <= 0 ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>' : '<div class="info-overlay">+ info</div>'}
+            ${producto.stock <= 0
+              ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>'
+              : '<div class="info-overlay">+ info</div>'}
           </div>
         `;
       }
@@ -148,6 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.innerHTML = `
         ${imagenHTML}
         <h3>${producto.nombre}</h3>
+        ${etiquetasHTML}
         <p class="categoria-texto">${producto.categoria}</p>
         <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
