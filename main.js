@@ -74,7 +74,7 @@ function mostrarPopup() {
     popup.style.display = 'block';
     setTimeout(() => {
       popup.style.display = 'none';
-    }, 1000);
+    }, 1200);
   }
 }
 
@@ -101,6 +101,15 @@ function animarCarrito() {
   if (icono) {
     icono.classList.add('vibrar');
     setTimeout(() => icono.classList.remove('vibrar'), 500);
+  }
+}
+
+function toggleCarrito() {
+  const carrito = document.getElementById('carrito');
+  if (window.innerWidth <= 768) {
+    carrito.style.display = (carrito.style.display === 'flex' || carrito.style.display === 'block') ? 'none' : 'flex';
+  } else {
+    carrito.style.display = (carrito.style.display === 'block') ? 'none' : 'block';
   }
 }
 
@@ -181,56 +190,65 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  const confirmarBtn = document.getElementById('confirmar');
-  confirmarBtn.addEventListener('click', () => {
-    if (carrito.length === 0) {
-      alert('Tu carrito está vacío.');
-      return;
-    }
+  // === Resumen WhatsApp ===
+  const modal = document.createElement('div');
+  modal.id = 'resumen-modal';
+  modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:1000;display:none;justify-content:center;align-items:center;';
+  modal.innerHTML = `
+    <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:400px;position:relative;">
+      <button id="cerrar-resumen" style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:1.4rem;">&times;</button>
+      <h2>Resumen de tu pedido</h2>
+      <div id="resumen-contenido" style="margin-bottom:1rem;"></div>
+      <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
+      <button id="cancelar-resumen" class="boton" style="background:#ccc;color:#333;">Cancelar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
 
-    let mensaje = 'Hola! Quiero realizar una compra:\n';
-    let total = 0;
+  document.getElementById('cancelar-resumen').onclick = () => {
+    modal.style.display = 'none';
+  };
 
-    carrito.forEach(item => {
-      const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
-      mensaje += `• ${linea}\n`;
-      total += item.precio * item.cantidad;
-    });
+  document.getElementById('cerrar-resumen').onclick = () => {
+    modal.style.display = 'none';
+  };
 
-    mensaje += `\nTotal: $${total.toLocaleString()}`;
-
-    const numeroWhatsApp = '5491130335334';
-    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+  document.getElementById('enviar-whatsapp').onclick = () => {
+    const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
+    const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
-  });
+    modal.style.display = 'none';
+  };
 
-  // === Mostrar/ocultar carrito ===
-  const carritoIcono = document.getElementById('carrito-icono');
-  const carritoOverlay = document.getElementById('carrito-overlay');
-  const cerrarCarrito = document.getElementById('cerrar-carrito');
+  const confirmarBtn = document.getElementById('confirmar');
+  if (confirmarBtn) {
+    confirmarBtn.addEventListener('click', () => {
+      if (carrito.length === 0) {
+        alert('Tu carrito está vacío.');
+        return;
+      }
 
-  carritoIcono.addEventListener('click', (e) => {
-    e.preventDefault();
-    const esMobile = window.innerWidth <= 768;
-    if (esMobile) {
-      carritoOverlay.style.display = 'flex';
-    } else {
-      carritoOverlay.style.display = carritoOverlay.style.display === 'flex' ? 'none' : 'flex';
-    }
-  });
+      const resumen = document.getElementById('resumen-contenido');
+      resumen.innerHTML = '';
+      let mensaje = 'Hola! Quiero realizar una compra:\n';
+      let total = 0;
 
-  cerrarCarrito.addEventListener('click', () => {
-    carritoOverlay.style.display = 'none';
-  });
+      carrito.forEach(item => {
+        const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
+        resumen.innerHTML += `<div style="margin-bottom: 0.4rem;">${linea}</div>`;
+        mensaje += `• ${linea}\n`;
+        total += item.precio * item.cantidad;
+      });
 
-  // Cerrar si clic fuera del carrito (solo mobile)
-  carritoOverlay.addEventListener('click', (e) => {
-    if (e.target === carritoOverlay && window.innerWidth <= 768) {
-      carritoOverlay.style.display = 'none';
-    }
-  });
+      mensaje += `\nTotal: $${total.toLocaleString()}`;
+      resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
 
-  // Buscador
+      document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
+      document.getElementById('resumen-modal').style.display = 'flex';
+    });
+  }
+
+  // === Buscador ===
   const inputBuscador = document.getElementById('buscador');
   inputBuscador.addEventListener('input', () => {
     const termino = inputBuscador.value.trim().toLowerCase();
@@ -245,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const nombreElem = producto.querySelector('h3');
       const categoriaElem = producto.querySelector('.categoria-texto');
 
-      if (coincide || termino === '') {
+      if (coincide) {
         producto.style.display = '';
         const terminoRegex = new RegExp(`(${termino})`, 'gi');
         nombreElem.innerHTML = producto.dataset.nombre.replace(terminoRegex, '<mark>$1</mark>');
@@ -254,5 +272,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         producto.style.display = 'none';
       }
     });
+  });
+
+  // === Mostrar carrito al hacer click ===
+  document.getElementById('carrito-icono').addEventListener('click', (e) => {
+    e.preventDefault();
+    toggleCarrito();
+  });
+
+  // === Ocultar carrito en móvil tocando fuera ===
+  document.addEventListener('click', (e) => {
+    const carrito = document.getElementById('carrito');
+    const icono = document.getElementById('carrito-icono');
+    if (window.innerWidth <= 768 &&
+        carrito.style.display === 'flex' &&
+        !carrito.contains(e.target) &&
+        !icono.contains(e.target)) {
+      carrito.style.display = 'none';
+    }
   });
 });
