@@ -12,7 +12,7 @@ async function cargarStockDesdeGoogleSheet() {
     const columnas = lineas[i].split(',').map(c => c.trim());
     const fila = Object.fromEntries(headers.map((h, j) => [h, columnas[j]]));
     const nombre = fila.nombre?.trim();
-    const stock = Number(fila.stock?.trim().replace(",", "."));
+    const stock = Number(fila.stock?.replace(",", "."));
     stockData[nombre] = isNaN(stock) ? 0 : stock;
   }
 
@@ -78,8 +78,7 @@ function mostrarPopup() {
 function cambiarCantidad(boton, delta) {
   const input = boton.parentElement.querySelector('.cantidad-input');
   let cantidad = parseInt(input.value) || 1;
-  cantidad += delta;
-  if (cantidad < 1) cantidad = 1;
+  cantidad = Math.max(1, cantidad + delta);
   input.value = cantidad;
 }
 
@@ -101,6 +100,35 @@ function animarCarrito() {
   }
 }
 
+function crearBotonIrArriba() {
+  const btn = document.createElement('button');
+  btn.id = 'ir-arriba';
+  btn.textContent = '↑';
+  btn.style.position = 'fixed';
+  btn.style.bottom = '20px';
+  btn.style.right = '20px';
+  btn.style.padding = '12px 16px';
+  btn.style.border = 'none';
+  btn.style.borderRadius = '50%';
+  btn.style.backgroundColor = '#f5a2f5';
+  btn.style.color = 'white';
+  btn.style.fontSize = '1.5rem';
+  btn.style.cursor = 'pointer';
+  btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+  btn.style.zIndex = '999';
+  btn.style.display = 'none';
+  btn.title = 'Ir arriba';
+  document.body.appendChild(btn);
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  window.addEventListener('scroll', () => {
+    btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await cargarStockDesdeGoogleSheet();
 
@@ -109,14 +137,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   productos.forEach(producto => {
     const categoria = producto.categoria || 'Sin categoría';
-    if (!productosPorCategoria[categoria]) productosPorCategoria[categoria] = [];
+    productosPorCategoria[categoria] ??= [];
     productosPorCategoria[categoria].push(producto);
   });
 
   for (const categoria in productosPorCategoria) {
     const grupo = document.createElement('div');
     grupo.className = 'grupo-categoria';
-
     const titulo = document.createElement('h2');
     titulo.textContent = categoria;
     grupo.appendChild(titulo);
@@ -132,18 +159,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.dataset.descripcion = producto.descripcion || '';
       div.dataset.categoria = producto.categoria || '';
 
+      const etiquetas = [];
+      if (producto.nuevo) etiquetas.push('🆕 Nuevo');
+      if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
+      if (producto.recomendado) etiquetas.push('⭐ Recomendado');
+
+      const etiquetasHTML = etiquetas.length
+        ? `<div class="etiquetas">${etiquetas.map(t => `<span class="etiqueta">${t}</span>`).join('')}</div>` : '';
+
       const imagenHTML = producto.imagen ? `
         <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
-          <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
-          ${producto.stock <= 0
-            ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>'
+          <img src="${producto.imagen}" alt="${producto.nombre}" />
+          ${producto.stock <= 0 
+            ? '<div class="sin-stock-overlay">SIN STOCK</div>' 
             : '<div class="info-overlay">+ info</div>'}
-        </div>
-      ` : '';
+        </div>` : '';
 
       div.innerHTML = `
         ${imagenHTML}
         <h3>${producto.nombre}</h3>
+        ${etiquetasHTML}
         <p class="categoria-texto">${producto.categoria}</p>
         <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
@@ -155,6 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           ${producto.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}
         </button>
       `;
+
       contenedorCategoria.appendChild(div);
     });
 
@@ -162,75 +198,60 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  // Modal resumen
-  const modal = document.createElement('div');
-  modal.id = 'resumen-modal';
-  modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.6);z-index:10000;display:none;justify-content:center;align-items:center;';
-  modal.innerHTML = `
-    <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:400px;position:relative;">
-      <button id="cerrar-modal" style="position:absolute;top:10px;right:10px;border:none;font-size:1.2rem;background:none;cursor:pointer;">✕</button>
-      <h2>Resumen de tu pedido</h2>
-      <div id="resumen-contenido" style="margin-bottom:1rem;"></div>
-      <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
-      <button id="seguir-comprando" class="boton" style="background:#ccc;color:#333;">Seguir comprando</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  document.getElementById('cerrar-modal').onclick =
-  document.getElementById('seguir-comprando').onclick = () => {
-    document.getElementById('resumen-modal').style.display = 'none';
-  };
-
-  document.getElementById('enviar-whatsapp').onclick = () => {
-    const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
-    const numeroWhatsApp = '5491130335334';
-    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-    document.getElementById('resumen-modal').style.display = 'none';
-  };
+  const carritoToggle = document.getElementById('carrito-icono');
+  carritoToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    const carrito = document.getElementById('carrito');
+    carrito.style.display = carrito.style.display === 'none' ? 'block' : 'none';
+  });
 
   const confirmarBtn = document.getElementById('confirmar');
-  confirmarBtn?.addEventListener('click', () => {
+  confirmarBtn.addEventListener('click', () => {
     if (carrito.length === 0) {
       alert('Tu carrito está vacío.');
       return;
     }
 
-    const resumen = document.getElementById('resumen-contenido');
-    resumen.innerHTML = '';
-    let mensaje = 'Hola! Quiero realizar una compra:\n';
-    let total = 0;
+    const resumen = carrito.map(item => `• ${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`).join('\n');
+    const total = carrito.reduce((s, i) => s + i.precio * i.cantidad, 0);
+    const mensaje = `Hola! Quiero realizar una compra:\n${resumen}\n\nTotal: $${total.toLocaleString()}`;
+    const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
 
-    carrito.forEach(item => {
-      const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
-      resumen.innerHTML += `<div style="margin-bottom: 0.4rem;">${linea}</div>`;
-      mensaje += `• ${linea}\n`;
-      total += item.precio * item.cantidad;
-    });
-
-    mensaje += `\nTotal: $${total.toLocaleString()}`;
-    resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
-
-    document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
-    document.getElementById('resumen-modal').style.display = 'flex';
+    document.getElementById('carrito').style.display = 'none';
   });
 
-  // Mostrar/ocultar carrito
-  document.getElementById('carrito-icono')?.addEventListener('click', e => {
-    e.preventDefault();
-    const carritoEl = document.getElementById('carrito');
-    carritoEl.style.display = carritoEl.style.display === 'none' ? 'block' : 'none';
+  document.addEventListener('click', (e) => {
+    const carrito = document.getElementById('carrito');
+    const icono = document.getElementById('carrito-icono');
+    if (!carrito.contains(e.target) && e.target !== icono && window.innerWidth < 768) {
+      carrito.style.display = 'none';
+    }
   });
 
-  // Scroll suave al botón "ir arriba"
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
+  // Buscador
+  const inputBuscador = document.getElementById('buscador');
+  inputBuscador.addEventListener('input', () => {
+    const termino = inputBuscador.value.trim().toLowerCase();
+    const productosDOM = document.querySelectorAll('.producto');
+
+    productosDOM.forEach(producto => {
+      const nombre = producto.dataset.nombre.toLowerCase();
+      const descripcion = (producto.dataset.descripcion || '').toLowerCase();
+      const categoria = (producto.dataset.categoria || '').toLowerCase();
+
+      const coincide = nombre.includes(termino) || descripcion.includes(termino) || categoria.includes(termino);
+      producto.style.display = coincide ? '' : 'none';
+
+      if (coincide) {
+        const nombreElem = producto.querySelector('h3');
+        const categoriaElem = producto.querySelector('.categoria-texto');
+        const regex = new RegExp(`(${termino})`, 'gi');
+        nombreElem.innerHTML = producto.dataset.nombre.replace(regex, '<mark>$1</mark>');
+        categoriaElem.innerHTML = producto.dataset.categoria.replace(regex, '<mark>$1</mark>');
       }
     });
   });
+
+  crearBotonIrArriba();
 });
