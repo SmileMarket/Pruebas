@@ -4,9 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SmileMarket</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg">
   <style>
+    :root {
+      --violeta: #f7b0f7;
+      --violeta-oscuro: #e392e3;
+      --azul: #007b7f;
+    }
+
     body {
       font-family: "Comic Neue", cursive;
       font-weight: 700;
@@ -17,23 +23,35 @@
     }
 
     header {
-      background: #f7b0f7;
+      background: var(--violeta);
       color: fuchsia;
-      padding: 1rem 2rem;
-      text-align: center;
+      padding: 0.5rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    header.scrolled {
+      padding: 0.3rem 1rem;
     }
 
     header img {
-      max-width: 100%;
+      max-width: 160px;
       height: auto;
       display: block;
       margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+
+    header.scrolled img {
+      max-width: 120px;
     }
 
     #buscador-container {
       display: flex;
       justify-content: center;
-      margin-top: 1rem;
+      margin-top: 0.5rem;
     }
 
     #buscador {
@@ -52,10 +70,10 @@
     }
 
     h2 {
-      border-bottom: 2px solid #f5a2f5;
+      border-bottom: 2px solid var(--violeta);
       padding-bottom: .3rem;
       margin-bottom: 1rem;
-      color: #007b7f;
+      color: var(--azul);
     }
 
     .productos {
@@ -67,18 +85,27 @@
 
     .producto {
       background: white;
-      border-radius: 6px;
-      box-shadow: 0 1px 4px rgb(0 0 0 / 0.1);
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
       padding: 1rem;
       width: 200px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      align-items: center;
+      text-align: center;
+    }
+
+    .producto img {
+      width: 100%;
+      height: 160px;
+      object-fit: contain;
+      margin-bottom: 10px;
     }
 
     .producto h3 {
       font-size: 1.1rem;
-      margin: 0 0 0.3rem 0;
+      margin: 0.3rem 0;
     }
 
     .etiquetas {
@@ -86,10 +113,12 @@
       flex-wrap: wrap;
       gap: 4px;
       font-size: 0.7rem;
+      justify-content: center;
+      margin-bottom: 0.3rem;
     }
 
     .etiqueta {
-      background: rgba(247, 176, 247, 0.5);
+      background: var(--violeta);
       color: #333;
       padding: 2px 6px;
       border-radius: 4px;
@@ -103,7 +132,7 @@
     }
 
     .precio {
-      color: #f5a2f5;
+      color: var(--violeta);
       font-weight: 700;
       margin-bottom: 0.5rem;
     }
@@ -117,31 +146,31 @@
     }
 
     .control-cantidad button {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border: none;
       background: #ddd;
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 1.1rem;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 6px;
     }
 
     .control-cantidad input {
-      width: 32px;
-      height: 28px;
+      width: 36px;
+      height: 32px;
       text-align: center;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: bold;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
 
     .boton {
-      background: #f5a2f5;
+      background: var(--violeta);
       border: none;
       color: white;
-      padding: 0.5rem;
+      padding: 0.6rem;
       cursor: pointer;
       font-weight: 600;
       border-radius: 4px;
@@ -149,19 +178,14 @@
     }
 
     .boton:hover {
-      background: #e392e3;
-    }
-
-    .producto-imagen-container {
-      position: relative;
-      cursor: pointer;
+      background: var(--violeta-oscuro);
     }
 
     .info-overlay {
       position: absolute;
       bottom: 10px;
       right: 10px;
-      background: #f7b0f7;
+      background: var(--violeta);
       color: white;
       padding: 4px 8px;
       font-size: 0.75rem;
@@ -169,9 +193,26 @@
       font-weight: bold;
     }
 
+    #popup {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--violeta);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      display: none;
+      z-index: 1000;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
     .carrito-float,
     .whatsapp-float,
-    .instagram-float {
+    .instagram-float,
+    .inicio-float {
       position: fixed;
       right: 15px;
       width: 50px;
@@ -189,7 +230,7 @@
     .carrito-float {
       top: 50%;
       background-color: white;
-      border: 2px solid #007b7f;
+      border: 2px solid var(--azul);
     }
 
     .whatsapp-float {
@@ -205,21 +246,11 @@
       border: 2px solid #E1306C;
     }
 
-    .carrito-float svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    #contador-carrito {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      background: red;
+    .inicio-float {
+      bottom: 80px;
+      background-color: var(--violeta);
       color: white;
-      font-size: 0.75rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      font-weight: bold;
+      font-size: 24px;
     }
 
     #carrito {
@@ -237,57 +268,23 @@
       z-index: 999;
       overflow-y: auto;
       display: none;
+      transition: opacity 0.3s ease;
     }
 
     @media (max-width: 768px) {
       #carrito {
         position: fixed;
-        bottom: 0;
-        top: auto;
-        right: 0;
+        top: 0;
         left: 0;
+        right: 0;
         width: 100%;
-        height: 60%;
-        max-height: 90vh;
-        z-index: 10000;
-        border-radius: 12px 12px 0 0;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        height: 100%;
+        max-height: 100%;
+        z-index: 9999;
+        background: white;
         padding: 1rem;
+        overflow-y: auto;
       }
-    }
-
-    #popup {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #f7b0f7;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      display: none;
-      z-index: 1000;
-      font-weight: bold;
-      font-size: 1rem;
-    }
-
-    .vibrar {
-      animation: vibrar 0.3s ease;
-    }
-
-    @keyframes vibrar {
-      0% { transform: translate(0); }
-      25% { transform: translate(-2px, 2px); }
-      50% { transform: translate(2px, -2px); }
-      75% { transform: translate(-2px, 2px); }
-      100% { transform: translate(0); }
-    }
-
-    #carrito h2 {
-      color: #007b7f;
-      margin-top: 0;
-      margin-bottom: 0.5rem;
     }
 
     .carrito-item {
@@ -304,7 +301,6 @@
       color: #d9534f;
       font-size: 1.2rem;
       cursor: pointer;
-      padding: 0;
     }
 
     #total {
@@ -316,7 +312,7 @@
     #confirmar {
       margin-top: 1rem;
       width: 100%;
-      background: #007b7f;
+      background: var(--azul);
       color: white;
       border: none;
       padding: 0.6rem;
@@ -325,17 +321,10 @@
       cursor: pointer;
     }
   </style>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('Service Worker registrado'))
-        .catch(err => console.error('SW error:', err));
-    }
-  </script>
 </head>
 <body>
-  <header>
-    <img src="img/Logo.jpg" alt="Logo SmileMarket" />
+  <header id="main-header">
+    <img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg" alt="Logo SmileMarket" />
     <div id="buscador-container">
       <input type="text" id="buscador" placeholder="Buscar productos..." />
     </div>
@@ -355,6 +344,7 @@
 
   <div id="popup">Producto agregado al carrito</div>
 
+  <!-- Modal de información -->
   <div id="info-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
     <div style="background:white; padding:20px; border-radius:6px; max-width:400px; width:90%; position:relative;">
       <button onclick="cerrarModalInfo()" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
@@ -375,9 +365,17 @@
     <span id="contador-carrito">0</span>
   </a>
 
-  <a href="https://www.instagram.com/smilemarket.ar" target="_blank" class="instagram-float" title="Instagram">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" width="24" height="24" />
+  <a href="https://www.instagram.com/smilemarket.ar?igsh=MXc4bHZoMXYxaHpuNQ==" 
+     target="_blank" 
+     class="instagram-float" 
+     title="Instagram">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" 
+         alt="Instagram" 
+         width="24" 
+         height="24" />
   </a>
+
+  <a href="#" class="inicio-float" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" title="Ir al inicio">⬆</a>
 
   <script src="productos.js"></script>
   <script src="main.js"></script>

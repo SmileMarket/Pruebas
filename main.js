@@ -2,7 +2,6 @@ const carrito = [];
 
 async function cargarStockDesdeGoogleSheet() {
   const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=0&single=true&output=csv';
-
   const response = await fetch(urlCSV);
   const texto = await response.text();
   const lineas = texto.split('\n');
@@ -66,16 +65,17 @@ function actualizarCarrito() {
 
   document.getElementById('total').textContent = 'Total: $' + total.toLocaleString();
   document.getElementById('contador-carrito').textContent = cantidadTotal;
+
+  // Mostrar botón carrito solo si hay productos
+  document.getElementById('carrito-icono').style.display = cantidadTotal > 0 ? 'flex' : 'none';
 }
 
 function mostrarPopup() {
   const popup = document.getElementById('popup');
-  if (popup) {
-    popup.style.display = 'block';
-    setTimeout(() => {
-      popup.style.display = 'none';
-    }, 1200);
-  }
+  popup.style.display = 'block';
+  setTimeout(() => {
+    popup.style.display = 'none';
+  }, 1000);
 }
 
 function cambiarCantidad(boton, delta) {
@@ -98,18 +98,13 @@ function cerrarModalInfo() {
 
 function animarCarrito() {
   const icono = document.getElementById('carrito-icono');
-  if (icono) {
-    icono.classList.add('vibrar');
-    setTimeout(() => icono.classList.remove('vibrar'), 500);
-  }
+  icono.classList.add('vibrar');
+  setTimeout(() => icono.classList.remove('vibrar'), 500);
 }
 
-function toggleCarrito() {
-  const carrito = document.getElementById('carrito');
+function cerrarCarritoSiEsMovil() {
   if (window.innerWidth <= 768) {
-    carrito.style.display = (carrito.style.display === 'flex' || carrito.style.display === 'block') ? 'none' : 'flex';
-  } else {
-    carrito.style.display = (carrito.style.display === 'block') ? 'none' : 'block';
+    document.getElementById('carrito').style.display = 'none';
   }
 }
 
@@ -146,23 +141,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.dataset.descripcion = producto.descripcion || '';
       div.dataset.categoria = producto.categoria || '';
 
-      const etiquetas = [];
-      if (producto.nuevo) etiquetas.push('🆕 Nuevo');
-      if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
-      if (producto.recomendado) etiquetas.push('⭐ Recomendado');
-
-      const etiquetasHTML = etiquetas.length > 0
-        ? `<div class="etiquetas">${etiquetas.map(t => `<span class="etiqueta">${t}</span>`).join('')}</div>`
-        : '';
-
       let imagenHTML = "";
       if (producto.imagen) {
         imagenHTML = `
           <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
-            <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
-            ${producto.stock <= 0
-              ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>'
-              : '<div class="info-overlay">+ info</div>'}
+            <img src="${producto.imagen}" alt="${producto.nombre}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; margin-bottom:10px;" />
+            ${producto.stock <= 0 ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>' : '<div class="info-overlay">+ info</div>'}
           </div>
         `;
       }
@@ -170,7 +154,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.innerHTML = `
         ${imagenHTML}
         <h3>${producto.nombre}</h3>
-        ${etiquetasHTML}
         <p class="categoria-texto">${producto.categoria}</p>
         <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
         <div class="control-cantidad">
@@ -190,65 +173,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  // === Resumen WhatsApp ===
-  const modal = document.createElement('div');
-  modal.id = 'resumen-modal';
-  modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:1000;display:none;justify-content:center;align-items:center;';
-  modal.innerHTML = `
-    <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:400px;position:relative;">
-      <button id="cerrar-resumen" style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:1.4rem;">&times;</button>
-      <h2>Resumen de tu pedido</h2>
-      <div id="resumen-contenido" style="margin-bottom:1rem;"></div>
-      <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
-      <button id="cancelar-resumen" class="boton" style="background:#ccc;color:#333;">Cancelar</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
+  // Botón de carrito flotante
+  document.getElementById('carrito-icono').addEventListener('click', e => {
+    e.preventDefault();
+    const carrito = document.getElementById('carrito');
+    const visible = carrito.style.display === 'block';
+    carrito.style.display = visible ? 'none' : 'block';
+  });
 
-  document.getElementById('cancelar-resumen').onclick = () => {
-    modal.style.display = 'none';
-  };
-
-  document.getElementById('cerrar-resumen').onclick = () => {
-    modal.style.display = 'none';
-  };
-
-  document.getElementById('enviar-whatsapp').onclick = () => {
-    const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
-    const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-    modal.style.display = 'none';
-  };
-
+  // Confirmar compra
   const confirmarBtn = document.getElementById('confirmar');
-  if (confirmarBtn) {
-    confirmarBtn.addEventListener('click', () => {
-      if (carrito.length === 0) {
-        alert('Tu carrito está vacío.');
-        return;
-      }
+  confirmarBtn.addEventListener('click', () => {
+    if (carrito.length === 0) {
+      alert('Tu carrito está vacío.');
+      return;
+    }
 
-      const resumen = document.getElementById('resumen-contenido');
-      resumen.innerHTML = '';
-      let mensaje = 'Hola! Quiero realizar una compra:\n';
-      let total = 0;
+    const resumen = document.createElement('div');
+    resumen.innerHTML = '';
+    let mensaje = 'Hola! Quiero realizar una compra:\n';
+    let total = 0;
 
-      carrito.forEach(item => {
-        const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
-        resumen.innerHTML += `<div style="margin-bottom: 0.4rem;">${linea}</div>`;
-        mensaje += `• ${linea}\n`;
-        total += item.precio * item.cantidad;
-      });
-
-      mensaje += `\nTotal: $${total.toLocaleString()}`;
-      resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
-
-      document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
-      document.getElementById('resumen-modal').style.display = 'flex';
+    carrito.forEach(item => {
+      const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
+      mensaje += `• ${linea}\n`;
+      total += item.precio * item.cantidad;
     });
-  }
 
-  // === Buscador ===
+    mensaje += `\nTotal: $${total.toLocaleString()}`;
+
+    const confirmacion = confirm(mensaje + "\n\n¿Deseás enviarlo por WhatsApp?");
+    if (confirmacion) {
+      const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
+    } else {
+      cerrarCarritoSiEsMovil();
+    }
+  });
+
+  // Cerrar carrito tocando fuera en móviles
+  window.addEventListener('click', (e) => {
+    const carrito = document.getElementById('carrito');
+    if (window.innerWidth <= 768 && carrito.style.display === 'block') {
+      if (!carrito.contains(e.target) && !e.target.closest('#carrito-icono')) {
+        carrito.style.display = 'none';
+      }
+    }
+  });
+
+  // Buscador con resaltado
   const inputBuscador = document.getElementById('buscador');
   inputBuscador.addEventListener('input', () => {
     const termino = inputBuscador.value.trim().toLowerCase();
@@ -274,21 +247,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // === Mostrar carrito al hacer click ===
-  document.getElementById('carrito-icono').addEventListener('click', (e) => {
-    e.preventDefault();
-    toggleCarrito();
-  });
-
-  // === Ocultar carrito en móvil tocando fuera ===
-  document.addEventListener('click', (e) => {
-    const carrito = document.getElementById('carrito');
-    const icono = document.getElementById('carrito-icono');
-    if (window.innerWidth <= 768 &&
-        carrito.style.display === 'flex' &&
-        !carrito.contains(e.target) &&
-        !icono.contains(e.target)) {
-      carrito.style.display = 'none';
+  // Encabezado sticky con reducción
+  const header = document.getElementById('main-header');
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    const actual = window.scrollY;
+    if (actual > lastScroll && actual > 60) {
+      header.style.padding = '0.5rem 1rem';
+    } else {
+      header.style.padding = '1rem 2rem';
     }
+    lastScroll = actual;
   });
 });
