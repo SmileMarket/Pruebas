@@ -181,30 +181,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  // Modal resumen y botón confirmar
   const confirmarBtn = document.getElementById('confirmar');
-  if (confirmarBtn) {
-    confirmarBtn.addEventListener('click', () => {
-      if (carrito.length === 0) {
-        alert('Tu carrito está vacío.');
-        return;
-      }
+  confirmarBtn.addEventListener('click', () => {
+    if (carrito.length === 0) {
+      alert('Tu carrito está vacío.');
+      return;
+    }
 
-      let mensaje = 'Hola! Quiero realizar una compra:\n';
-      let total = 0;
+    let mensaje = 'Hola! Quiero realizar una compra:\n';
+    let total = 0;
 
-      carrito.forEach(item => {
-        const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
-        mensaje += `• ${linea}\n`;
-        total += item.precio * item.cantidad;
-      });
-
-      mensaje += `\nTotal: $${total.toLocaleString()}`;
-      const numeroWhatsApp = '5491130335334';
-      const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-      window.open(url, '_blank');
+    carrito.forEach(item => {
+      const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
+      mensaje += `• ${linea}\n`;
+      total += item.precio * item.cantidad;
     });
-  }
+
+    mensaje += `\nTotal: $${total.toLocaleString()}`;
+
+    const numeroWhatsApp = '5491130335334';
+    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+  });
+
+  // === Mostrar/ocultar carrito ===
+  const carritoIcono = document.getElementById('carrito-icono');
+  const carritoOverlay = document.getElementById('carrito-overlay');
+  const cerrarCarrito = document.getElementById('cerrar-carrito');
+
+  carritoIcono.addEventListener('click', (e) => {
+    e.preventDefault();
+    const esMobile = window.innerWidth <= 768;
+    if (esMobile) {
+      carritoOverlay.style.display = 'flex';
+    } else {
+      carritoOverlay.style.display = carritoOverlay.style.display === 'flex' ? 'none' : 'flex';
+    }
+  });
+
+  cerrarCarrito.addEventListener('click', () => {
+    carritoOverlay.style.display = 'none';
+  });
+
+  // Cerrar si clic fuera del carrito (solo mobile)
+  carritoOverlay.addEventListener('click', (e) => {
+    if (e.target === carritoOverlay && window.innerWidth <= 768) {
+      carritoOverlay.style.display = 'none';
+    }
+  });
 
   // Buscador
   const inputBuscador = document.getElementById('buscador');
@@ -221,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const nombreElem = producto.querySelector('h3');
       const categoriaElem = producto.querySelector('.categoria-texto');
 
-      if (coincide) {
+      if (coincide || termino === '') {
         producto.style.display = '';
         const terminoRegex = new RegExp(`(${termino})`, 'gi');
         nombreElem.innerHTML = producto.dataset.nombre.replace(terminoRegex, '<mark>$1</mark>');
@@ -230,15 +254,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         producto.style.display = 'none';
       }
     });
-  });
-
-  // Mostrar/Ocultar carrito al tocar el ícono
-  document.getElementById('carrito-icono').addEventListener('click', (e) => {
-    e.preventDefault();
-    const carritoBox = document.getElementById('carrito');
-    const visible = carritoBox.style.display === 'block';
-
-    carritoBox.style.display = visible ? 'none' : 'block';
-    document.body.classList.toggle('carrito-abierto', !visible);
   });
 });
