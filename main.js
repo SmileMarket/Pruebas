@@ -38,7 +38,6 @@ function agregarAlCarrito(boton) {
   mostrarPopup();
   animarCarrito();
   actualizarCarrito();
-  mostrarCarritoSiEsMovil();
 }
 
 function eliminarDelCarrito(index) {
@@ -58,7 +57,7 @@ function actualizarCarrito() {
     itemDiv.innerHTML = `
       <div>${item.nombre} x ${item.cantidad}</div>
       <div>$${(item.precio * item.cantidad).toLocaleString()}</div>
-      <button onclick="eliminarDelCarrito(${index})" class="eliminar-btn">&times;</button>
+      <button onclick="eliminarDelCarrito(${index})">&times;</button>
     `;
     carritoItems.appendChild(itemDiv);
     total += item.precio * item.cantidad;
@@ -67,21 +66,14 @@ function actualizarCarrito() {
 
   document.getElementById('total').textContent = 'Total: $' + total.toLocaleString();
   document.getElementById('contador-carrito').textContent = cantidadTotal;
-
-  const carrito = document.getElementById('carrito');
-  if (cantidadTotal > 0 && window.innerWidth < 768) {
-    carrito.style.display = 'block';
-  }
 }
 
 function mostrarPopup() {
   const popup = document.getElementById('popup');
-  if (popup) {
-    popup.style.display = 'block';
-    setTimeout(() => {
-      popup.style.display = 'none';
-    }, 1000);
-  }
+  popup.style.display = 'block';
+  setTimeout(() => {
+    popup.style.display = 'none';
+  }, 1000);
 }
 
 function cambiarCantidad(boton, delta) {
@@ -92,24 +84,20 @@ function cambiarCantidad(boton, delta) {
   input.value = cantidad;
 }
 
-function mostrarCarritoSiEsMovil() {
-  const carrito = document.getElementById('carrito');
-  if (window.innerWidth < 768) {
-    carrito.style.display = 'block';
-  }
+function mostrarModalInfo(nombre, descripcion) {
+  document.getElementById('modal-titulo').textContent = nombre;
+  document.getElementById('modal-descripcion').textContent = descripcion;
+  document.getElementById('info-modal').style.display = 'flex';
 }
 
-function cerrarCarrito() {
-  const carrito = document.getElementById('carrito');
-  carrito.style.display = 'none';
+function cerrarModalInfo() {
+  document.getElementById('info-modal').style.display = 'none';
 }
 
 function animarCarrito() {
   const icono = document.getElementById('carrito-icono');
-  if (icono) {
-    icono.classList.add('vibrar');
-    setTimeout(() => icono.classList.remove('vibrar'), 500);
-  }
+  icono.classList.add('vibrar');
+  setTimeout(() => icono.classList.remove('vibrar'), 400);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -157,10 +145,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       let imagenHTML = "";
       if (producto.imagen) {
         imagenHTML = `
-          <div class="producto-imagen-container">
+          <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
             <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
             ${producto.stock <= 0
-              ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>'
+              ? '<div class="sin-stock-overlay">SIN STOCK</div>'
               : '<div class="info-overlay">+ info</div>'}
           </div>
         `;
@@ -189,59 +177,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  // Botón de scroll suave hacia arriba
-  const btnIrArriba = document.createElement('button');
-  btnIrArriba.textContent = '↑';
-  btnIrArriba.title = 'Ir arriba';
-  btnIrArriba.style = `
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    z-index: 999;
-    padding: 10px 12px;
-    font-size: 1.2rem;
-    background-color: #007b7f;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  `;
-  btnIrArriba.onclick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  document.body.appendChild(btnIrArriba);
-
-  // Evento para abrir/cerrar carrito
-  document.getElementById('carrito-icono').addEventListener('click', (e) => {
+  const carritoIcono = document.getElementById('carrito-icono');
+  carritoIcono.addEventListener('click', (e) => {
     e.preventDefault();
     const carrito = document.getElementById('carrito');
-    carrito.style.display = carrito.style.display === 'block' ? 'none' : 'block';
+    carrito.style.display = (carrito.style.display === 'none' || carrito.style.display === '') ? 'block' : 'none';
   });
 
-  // Botón cerrar carrito (solo en móvil)
-  const cerrarBtn = document.createElement('button');
-  cerrarBtn.innerText = '❌';
-  cerrarBtn.title = 'Cerrar';
-  cerrarBtn.style = `
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    font-size: 1.2rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #d9534f;
-    z-index: 1001;
-  `;
-  cerrarBtn.addEventListener('click', cerrarCarrito);
-  document.getElementById('carrito').appendChild(cerrarBtn);
+  const confirmarBtn = document.getElementById('confirmar');
+  confirmarBtn.addEventListener('click', () => {
+    if (carrito.length === 0) {
+      alert('Tu carrito está vacío.');
+      return;
+    }
 
-  // Botón "Seguir comprando"
-  const seguirBtn = document.createElement('button');
-  seguirBtn.innerText = 'Seguir comprando';
-  seguirBtn.className = 'boton';
-  seguirBtn.style = 'margin-top: 10px; background: #ccc; color: #333;';
-  seguirBtn.addEventListener('click', cerrarCarrito);
-  document.getElementById('carrito').appendChild(seguirBtn);
+    let mensaje = 'Hola! Quiero realizar una compra:\n\n';
+    let total = 0;
+
+    carrito.forEach(item => {
+      const subtotal = item.precio * item.cantidad;
+      mensaje += `• ${item.nombre} x ${item.cantidad} - $${subtotal.toLocaleString()}\n`;
+      total += subtotal;
+    });
+
+    mensaje += `\nTotal: $${total.toLocaleString()}`;
+
+    const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+  });
+
+  const buscador = document.getElementById('buscador');
+  buscador.addEventListener('input', () => {
+    const termino = buscador.value.trim().toLowerCase();
+    const productosDOM = document.querySelectorAll('.producto');
+
+    productosDOM.forEach(producto => {
+      const nombre = producto.dataset.nombre.toLowerCase();
+      const descripcion = (producto.dataset.descripcion || '').toLowerCase();
+      const categoria = (producto.dataset.categoria || '').toLowerCase();
+
+      const coincide = nombre.includes(termino) || descripcion.includes(termino) || categoria.includes(termino);
+
+      if (coincide || termino === '') {
+        producto.style.display = '';
+      } else {
+        producto.style.display = 'none';
+      }
+    });
+  });
 });
+
