@@ -38,7 +38,7 @@ function agregarAlCarrito(boton) {
   mostrarPopup();
   animarCarrito();
   actualizarCarrito();
-  mostrarCarrito();
+  mostrarCarrito(); // Se controla si es móvil dentro de esta función
 }
 
 function eliminarDelCarrito(index) {
@@ -80,8 +80,11 @@ function mostrarPopup() {
 }
 
 function mostrarCarrito() {
-  const carrito = document.getElementById('carrito');
-  carrito.style.display = 'block';
+  // ✅ Solo mostrar automáticamente si es escritorio
+  if (window.innerWidth >= 768) {
+    const carrito = document.getElementById('carrito');
+    carrito.style.display = 'block';
+  }
 }
 
 function cambiarCantidad(boton, delta) {
@@ -229,4 +232,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('resumen-modal').style.display = 'none';
   });
 });
-
