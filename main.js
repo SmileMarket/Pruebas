@@ -12,7 +12,7 @@ async function cargarStockDesdeGoogleSheet() {
     const columnas = lineas[i].split(',').map(c => c.trim());
     const fila = Object.fromEntries(headers.map((h, j) => [h, columnas[j]]));
     const nombre = fila.nombre?.trim();
-    const stock = Number(fila.stock?.replace(",", "."));
+    const stock = Number(fila.stock?.trim().replace(",", "."));
     stockData[nombre] = isNaN(stock) ? 0 : stock;
   }
 
@@ -71,14 +71,17 @@ function mostrarPopup() {
   const popup = document.getElementById('popup');
   if (popup) {
     popup.style.display = 'block';
-    setTimeout(() => popup.style.display = 'none', 1000);
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 1000);
   }
 }
 
 function cambiarCantidad(boton, delta) {
   const input = boton.parentElement.querySelector('.cantidad-input');
   let cantidad = parseInt(input.value) || 1;
-  cantidad = Math.max(1, cantidad + delta);
+  cantidad += delta;
+  if (cantidad < 1) cantidad = 1;
   input.value = cantidad;
 }
 
@@ -100,33 +103,13 @@ function animarCarrito() {
   }
 }
 
-function crearBotonIrArriba() {
-  const btn = document.createElement('button');
-  btn.id = 'ir-arriba';
-  btn.textContent = '↑';
-  btn.style.position = 'fixed';
-  btn.style.bottom = '20px';
-  btn.style.right = '20px';
-  btn.style.padding = '12px 16px';
-  btn.style.border = 'none';
-  btn.style.borderRadius = '50%';
-  btn.style.backgroundColor = '#f5a2f5';
-  btn.style.color = 'white';
-  btn.style.fontSize = '1.5rem';
-  btn.style.cursor = 'pointer';
-  btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-  btn.style.zIndex = '999';
-  btn.style.display = 'none';
-  btn.title = 'Ir arriba';
-  document.body.appendChild(btn);
-
-  btn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  window.addEventListener('scroll', () => {
-    btn.style.display = window.scrollY > 300 ? 'block' : 'none';
-  });
+function toggleCarrito() {
+  const carrito = document.getElementById('carrito');
+  if (window.innerWidth <= 768) {
+    carrito.style.display = (carrito.style.display === 'flex') ? 'none' : 'flex';
+  } else {
+    carrito.style.display = (carrito.style.display === 'block') ? 'none' : 'block';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -137,13 +120,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   productos.forEach(producto => {
     const categoria = producto.categoria || 'Sin categoría';
-    productosPorCategoria[categoria] ??= [];
+    if (!productosPorCategoria[categoria]) {
+      productosPorCategoria[categoria] = [];
+    }
     productosPorCategoria[categoria].push(producto);
   });
 
   for (const categoria in productosPorCategoria) {
     const grupo = document.createElement('div');
     grupo.className = 'grupo-categoria';
+
     const titulo = document.createElement('h2');
     titulo.textContent = categoria;
     grupo.appendChild(titulo);
@@ -164,16 +150,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
       if (producto.recomendado) etiquetas.push('⭐ Recomendado');
 
-      const etiquetasHTML = etiquetas.length
-        ? `<div class="etiquetas">${etiquetas.map(t => `<span class="etiqueta">${t}</span>`).join('')}</div>` : '';
+      const etiquetasHTML = etiquetas.length > 0
+        ? `<div class="etiquetas">${etiquetas.map(t => `<span class="etiqueta">${t}</span>`).join('')}</div>`
+        : '';
 
       const imagenHTML = producto.imagen ? `
         <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
-          <img src="${producto.imagen}" alt="${producto.nombre}" />
-          ${producto.stock <= 0 
-            ? '<div class="sin-stock-overlay">SIN STOCK</div>' 
+          <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; margin-bottom:10px;" />
+          ${producto.stock <= 0
+            ? '<div class="info-overlay" style="background:red;color:white;">SIN STOCK</div>'
             : '<div class="info-overlay">+ info</div>'}
-        </div>` : '';
+        </div>
+      ` : '';
 
       div.innerHTML = `
         ${imagenHTML}
@@ -198,36 +186,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  const carritoToggle = document.getElementById('carrito-icono');
-  carritoToggle.addEventListener('click', (e) => {
+  document.getElementById('carrito-icono').addEventListener('click', (e) => {
     e.preventDefault();
-    const carrito = document.getElementById('carrito');
-    carrito.style.display = carrito.style.display === 'none' ? 'block' : 'none';
+    toggleCarrito();
   });
 
   const confirmarBtn = document.getElementById('confirmar');
-  confirmarBtn.addEventListener('click', () => {
-    if (carrito.length === 0) {
-      alert('Tu carrito está vacío.');
-      return;
-    }
+  if (confirmarBtn) {
+    confirmarBtn.addEventListener('click', () => {
+      if (carrito.length === 0) {
+        alert('Tu carrito está vacío.');
+        return;
+      }
 
-    const resumen = carrito.map(item => `• ${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`).join('\n');
-    const total = carrito.reduce((s, i) => s + i.precio * i.cantidad, 0);
-    const mensaje = `Hola! Quiero realizar una compra:\n${resumen}\n\nTotal: $${total.toLocaleString()}`;
-    const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
+      const resumen = document.createElement('div');
+      resumen.innerHTML = '';
+      let mensaje = 'Hola! Quiero realizar una compra:\n';
+      let total = 0;
 
-    document.getElementById('carrito').style.display = 'none';
-  });
+      carrito.forEach(item => {
+        const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
+        mensaje += `• ${linea}\n`;
+        total += item.precio * item.cantidad;
+      });
 
-  document.addEventListener('click', (e) => {
-    const carrito = document.getElementById('carrito');
-    const icono = document.getElementById('carrito-icono');
-    if (!carrito.contains(e.target) && e.target !== icono && window.innerWidth < 768) {
-      carrito.style.display = 'none';
-    }
-  });
+      mensaje += `\nTotal: $${total.toLocaleString()}`;
+      const numeroWhatsApp = '5491130335334';
+      const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
+    });
+  }
+
+  // Scroll suave
+  const irArribaBtn = document.getElementById('ir-arriba');
+  if (irArribaBtn) {
+    irArribaBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
   // Buscador
   const inputBuscador = document.getElementById('buscador');
@@ -239,19 +236,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const nombre = producto.dataset.nombre.toLowerCase();
       const descripcion = (producto.dataset.descripcion || '').toLowerCase();
       const categoria = (producto.dataset.categoria || '').toLowerCase();
-
       const coincide = nombre.includes(termino) || descripcion.includes(termino) || categoria.includes(termino);
       producto.style.display = coincide ? '' : 'none';
-
-      if (coincide) {
-        const nombreElem = producto.querySelector('h3');
-        const categoriaElem = producto.querySelector('.categoria-texto');
-        const regex = new RegExp(`(${termino})`, 'gi');
-        nombreElem.innerHTML = producto.dataset.nombre.replace(regex, '<mark>$1</mark>');
-        categoriaElem.innerHTML = producto.dataset.categoria.replace(regex, '<mark>$1</mark>');
-      }
     });
   });
-
-  crearBotonIrArriba();
 });

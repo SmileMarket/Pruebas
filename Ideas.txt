@@ -1,0 +1,7 @@
+Adicional a lo anterior agregar:
+
+Funcionalidades nuevas: Login para usuarios frecuentes (opcional):
+
+Podrías permitir guardar el carrito o historial, especialmente útil para clientes recurrentes.
+
+Convierta a PWA (app instalable en el celular)
