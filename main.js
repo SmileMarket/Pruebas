@@ -125,13 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       productosPorCategoria[categoria] = [];
     }
     productosPorCategoria[categoria].push(producto);
-document.getElementById('cerrar-carrito').addEventListener('click', () => {
-  document.getElementById('carrito').style.display = 'none';
-});
-
-document.getElementById('seguir-comprando').addEventListener('click', () => {
-  document.getElementById('carrito').style.display = 'none';
-});
+  });
 
   for (const categoria in productosPorCategoria) {
     const grupo = document.createElement('div');
