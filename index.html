@@ -23,7 +23,7 @@
       position: sticky;
       top: 0;
       background: #f7b0f7;
-      z-index: 1000;
+      z-index: 1001;
       padding: 1rem 2rem;
       text-align: center;
       transition: padding 0.3s ease;
@@ -191,6 +191,7 @@
       border-radius: 4px;
       font-weight: bold;
     }
+
     .sin-stock-overlay {
       background: rgba(255, 0, 0, 0.85);
       color: white;
@@ -203,7 +204,6 @@
       font-weight: bold;
       z-index: 3;
     }
-
     #popup {
       position: fixed;
       bottom: 20px;
@@ -299,7 +299,7 @@
       padding: 1rem;
       font-family: 'Comic Neue', cursive;
       font-size: 0.95rem;
-      z-index: 1101;
+      z-index: 1001;
       overflow-y: auto;
       display: none;
       transition: opacity 0.3s ease;
@@ -346,6 +346,17 @@
       cursor: pointer;
     }
 
+    #cerrar-carrito {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font-size: 1.4rem;
+      background: none;
+      border: none;
+      color: #d9534f;
+      cursor: pointer;
+    }
+
     @media (max-width: 768px) {
       header img {
         max-width: 180px;
@@ -365,7 +376,11 @@
         max-height: 90vh;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         display: none;
-        z-index: 1000;
+        z-index: 1002;
+      }
+
+      #cerrar-carrito {
+        font-size: 1.6rem;
       }
     }
   </style>
@@ -384,6 +399,7 @@
   </div>
 
   <div id="carrito">
+    <button id="cerrar-carrito">&times;</button>
     <h2>Carrito</h2>
     <div id="carrito-items"></div>
     <div id="total">Total: $0</div>
@@ -454,6 +470,14 @@
 
     irArriba.addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('cerrar-carrito').addEventListener('click', () => {
+      document.getElementById('carrito').style.display = 'none';
+    });
+
+    document.getElementById('seguir-comprando').addEventListener('click', () => {
+      document.getElementById('resumen-modal').style.display = 'none';
     });
   </script>
 </body>
