@@ -1,25 +1,35 @@
 const carrito = [];
 
-async function cargarStockDesdeGoogleSheet() {
-  const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=0&single=true&output=csv';
+async function cargarProductosDesdeGoogleSheet() {
+  const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=1670706691&single=true&output=csv';
 
   const response = await fetch(urlCSV);
   const texto = await response.text();
-  const lineas = texto.split('\n');
+  const lineas = texto.split('\n').filter(line => line.trim() !== '');
   const headers = lineas[0].split(',').map(h => h.trim());
 
-  const stockData = {};
+  const productos = [];
+
   for (let i = 1; i < lineas.length; i++) {
     const columnas = lineas[i].split(',').map(c => c.trim());
     const fila = Object.fromEntries(headers.map((h, j) => [h, columnas[j]]));
-    const nombre = fila.nombre?.trim();
-    const stock = Number(fila.stock?.trim().replace(",", "."));
-    stockData[nombre] = isNaN(stock) ? 0 : stock;
+
+    if (fila.nombre && fila.precio) {
+      productos.push({
+        nombre: fila.nombre,
+        precio: parseFloat(fila.precio),
+        imagen: fila.imagen,
+        descripcion: fila.descripcion || '',
+        categoria: fila.categoria || '',
+        stock: parseInt(fila.stock) || 0,
+        nuevo: fila.nuevo?.toLowerCase() === 'true',
+        masVendido: fila.masVendido?.toLowerCase() === 'true',
+        recomendado: fila.recomendado?.toLowerCase() === 'true'
+      });
+    }
   }
 
-  productos.forEach(p => {
-    p.stock = stockData[p.nombre] ?? 0;
-  });
+  renderizarProductos(productos);
 }
 
 function agregarAlCarrito(boton) {
@@ -39,6 +49,7 @@ function agregarAlCarrito(boton) {
   animarCarrito();
   actualizarCarrito();
 }
+
 function eliminarDelCarrito(index) {
   carrito.splice(index, 1);
   actualizarCarrito();
@@ -84,6 +95,7 @@ function cambiarCantidad(boton, delta) {
   if (cantidad < 1) cantidad = 1;
   input.value = cantidad;
 }
+
 function mostrarModalInfo(nombre, descripcion) {
   document.getElementById('modal-titulo').textContent = nombre;
   document.getElementById('modal-descripcion').textContent = descripcion;
@@ -102,9 +114,7 @@ function animarCarrito() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await cargarStockDesdeGoogleSheet();
-
+function renderizarProductos(productos) {
   const contenedor = document.getElementById('productos');
   const productosPorCategoria = {};
 
@@ -146,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const imagenHTML = producto.imagen ? `
         <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
-          <img src="${producto.imagen}" alt="${producto.nombre}" />
+          <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; aspect-ratio:1/1; object-fit:contain; margin-bottom:10px;" />
           ${producto.stock <= 0
             ? '<div class="sin-stock-overlay">SIN STOCK</div>'
             : '<div class="info-overlay">+ info</div>'}
@@ -174,11 +184,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     grupo.appendChild(contenedorCategoria);
     contenedor.appendChild(grupo);
   }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await cargarProductosDesdeGoogleSheet();
 
   document.getElementById('carrito-icono').addEventListener('click', (e) => {
     e.preventDefault();
     const carrito = document.getElementById('carrito');
-    carrito.style.display = carrito.style.display === 'block' ? 'none' : 'block';
+    carrito.style.display = (carrito.style.display === 'none') ? 'block' : 'none';
   });
 
   const confirmarBtn = document.getElementById('confirmar');
@@ -219,5 +233,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('seguir-comprando').addEventListener('click', () => {
     document.getElementById('resumen-modal').style.display = 'none';
+  });
+
+  const inputBuscador = document.getElementById('buscador');
+  inputBuscador.addEventListener('input', () => {
+    const termino = inputBuscador.value.trim().toLowerCase();
+    const productosDOM = document.querySelectorAll('.producto');
+
+    productosDOM.forEach(producto => {
+      const nombre = producto.dataset.nombre.toLowerCase();
+      const descripcion = (producto.dataset.descripcion || '').toLowerCase();
+      const categoria = (producto.dataset.categoria || '').toLowerCase();
+      const coincide = nombre.includes(termino) || descripcion.includes(termino) || categoria.includes(termino);
+
+      producto.style.display = coincide ? '' : 'none';
+
+      const nombreElem = producto.querySelector('h3');
+      const categoriaElem = producto.querySelector('.categoria-texto');
+
+      if (coincide) {
+        const terminoRegex = new RegExp(`(${termino})`, 'gi');
+        nombreElem.innerHTML = producto.dataset.nombre.replace(terminoRegex, '<mark>$1</mark>');
+        categoriaElem.innerHTML = producto.dataset.categoria.replace(terminoRegex, '<mark>$1</mark>');
+      }
+    });
   });
 });
