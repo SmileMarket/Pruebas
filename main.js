@@ -102,6 +102,8 @@ function cerrarModalInfo() {
 function animarCarrito() {
   const icono = document.getElementById('carrito-icono');
   if (icono) {
+    icono.classList.remove('vibrar'); // Reiniciar si está aplicada
+    void icono.offsetWidth; // Forzar reflow
     icono.classList.add('vibrar');
     setTimeout(() => icono.classList.remove('vibrar'), 500);
   }
