@@ -38,9 +38,7 @@ function agregarAlCarrito(boton) {
   mostrarPopup();
   animarCarrito();
   actualizarCarrito();
-  mostrarCarrito(); // Se controla si es móvil dentro de esta función
 }
-
 function eliminarDelCarrito(index) {
   carrito.splice(index, 1);
   actualizarCarrito();
@@ -79,14 +77,6 @@ function mostrarPopup() {
   }
 }
 
-function mostrarCarrito() {
-  // ✅ Solo mostrar automáticamente si es escritorio
-  if (window.innerWidth >= 768) {
-    const carrito = document.getElementById('carrito');
-    carrito.style.display = 'block';
-  }
-}
-
 function cambiarCantidad(boton, delta) {
   const input = boton.parentElement.querySelector('.cantidad-input');
   let cantidad = parseInt(input.value) || 1;
@@ -94,7 +84,6 @@ function cambiarCantidad(boton, delta) {
   if (cantidad < 1) cantidad = 1;
   input.value = cantidad;
 }
-
 function mostrarModalInfo(nombre, descripcion) {
   document.getElementById('modal-titulo').textContent = nombre;
   document.getElementById('modal-descripcion').textContent = descripcion;
@@ -157,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const imagenHTML = producto.imagen ? `
         <div class="producto-imagen-container" onclick="mostrarModalInfo('${producto.nombre}', \`${producto.descripcion || 'Sin descripción disponible'}\`)">
-          <img src="${producto.imagen}" alt="${producto.nombre}" style="max-width:100%; height:auto; aspect-ratio:1/1; object-fit:cover; margin-bottom:10px;" />
+          <img src="${producto.imagen}" alt="${producto.nombre}" />
           ${producto.stock <= 0
             ? '<div class="sin-stock-overlay">SIN STOCK</div>'
             : '<div class="info-overlay">+ info</div>'}
@@ -189,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('carrito-icono').addEventListener('click', (e) => {
     e.preventDefault();
     const carrito = document.getElementById('carrito');
-    carrito.style.display = (carrito.style.display === 'none') ? 'block' : 'none';
+    carrito.style.display = carrito.style.display === 'block' ? 'none' : 'block';
   });
 
   const confirmarBtn = document.getElementById('confirmar');
