@@ -26,11 +26,14 @@
       z-index: 1001;
       padding: 1rem 2rem;
       text-align: center;
-      transition: padding 0.3s ease;
+      transition: padding 0.3s ease, min-height 0.3s ease;
+      min-height: 100px;
+      will-change: padding, min-height;
     }
 
     header.shrink {
       padding: 0.5rem 1rem;
+      min-height: 70px;
     }
 
     header img {
@@ -415,7 +418,7 @@
   <div id="ir-arriba" title="Volver arriba">⬆</div>
 
   <script src="main.js"></script>
-  <script>
+<script>
     const irArriba = document.getElementById('ir-arriba');
     window.addEventListener('scroll', () => {
       irArriba.style.display = window.scrollY > 300 ? 'block' : 'none';
@@ -423,7 +426,7 @@
       header.classList.toggle('shrink', window.scrollY > 50);
     });
 
-    irArriba.addEventListener('click', () => {
+    irArriba?.addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
