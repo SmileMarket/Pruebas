@@ -102,8 +102,8 @@ function cerrarModalInfo() {
 function animarCarrito() {
   const icono = document.getElementById('carrito-icono');
   if (icono) {
-    icono.classList.remove('vibrar'); // Reiniciar si está aplicada
-    void icono.offsetWidth; // Forzar reflow
+    icono.classList.remove('vibrar');
+    void icono.offsetWidth; // fuerza reflow
     icono.classList.add('vibrar');
     setTimeout(() => icono.classList.remove('vibrar'), 500);
   }
@@ -181,13 +181,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     contenedor.appendChild(grupo);
   }
 
-  document.getElementById('carrito-icono')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const carrito = document.getElementById('carrito');
-    if (carrito) {
-      carrito.style.display = carrito.style.display === 'none' ? 'block' : 'none';
-    }
-  });
+  const carritoIcono = document.getElementById('carrito-icono');
+  const carritoPanel = document.getElementById('carrito');
+
+  if (carritoIcono && carritoPanel) {
+    carritoIcono.addEventListener('click', (e) => {
+      e.preventDefault();
+      carritoPanel.style.display = carritoPanel.style.display === 'block' ? 'none' : 'block';
+    });
+  }
 
   const confirmarBtn = document.getElementById('confirmar');
   if (confirmarBtn) {
