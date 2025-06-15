@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (carritoIcono && carritoPanel) {
     carritoIcono.addEventListener('click', (e) => {
       e.preventDefault();
-      carritoPanel.style.display = carritoPanel.style.display === 'block' ? 'none' : 'block';
+      carritoPanel.classList.toggle('mostrar');
     });
   }
 
