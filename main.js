@@ -103,7 +103,7 @@ function animarCarrito() {
   const icono = document.getElementById('carrito-icono');
   if (icono) {
     icono.classList.remove('vibrar');
-    void icono.offsetWidth; // fuerza reflow
+    void icono.offsetWidth;
     icono.classList.add('vibrar');
     setTimeout(() => icono.classList.remove('vibrar'), 500);
   }
