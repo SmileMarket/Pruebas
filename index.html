@@ -58,11 +58,12 @@ header.shrink img {
       font-size: 1rem;
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
+.container {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 3rem 1rem 1rem; /* ← más espacio arriba para evitar vibración scroll inicial */
+  transition: padding-top 0.3s ease;
+}
 
 h2 {
   border-bottom: 2px solid #f5a2f5;
