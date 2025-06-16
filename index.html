@@ -16,24 +16,24 @@
       background: #f9f9f9;
       color: #333;
       overflow-x: hidden;
-    }
 
-    header {
-      position: sticky;
-      top: 0;
-      background: #f7b0f7;
-      z-index: 1001;
-      padding: 1rem 2rem;
-      text-align: center;
-      transition: padding 0.3s ease, min-height 0.3s ease;
-      min-height: 100px;
-      will-change: padding, min-height;
-    }
+header {
+  position: sticky;
+  top: 0;
+  background: #f7b0f7;
+  z-index: 1001;
+  padding: 1rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  height: 100px;
+  overflow: hidden;
+}
 
-    header.shrink {
-      padding: 0.5rem 1rem;
-      min-height: 70px;
-    }
+header.shrink {
+  height: 70px;
+  padding: 0.5rem 1rem;
+}
+
 
     header img {
       max-width: 220px;
