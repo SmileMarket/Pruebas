@@ -25,25 +25,23 @@ header {
   padding: 1rem 2rem;
   text-align: center;
   transition: all 0.3s ease;
-  height: 100px;
-  overflow: hidden;
+  min-height: 100px;
 }
 
 header.shrink {
-  height: 70px;
   padding: 0.5rem 1rem;
 }
 
+header img {
+  max-width: 220px;
+  height: auto;
+  transition: all 0.3s ease;
+}
 
-    header img {
-      max-width: 220px;
-      height: auto;
-      transition: max-width 0.3s ease;
-    }
+header.shrink img {
+  max-width: 140px;
+}
 
-    header.shrink img {
-      max-width: 140px;
-    }
 
     #buscador-container {
       display: flex;
