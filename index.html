@@ -28,21 +28,6 @@ header {
   min-height: 100px;
 }
 
-header.shrink {
-  padding: 0.5rem 1rem;
-}
-
-header img {
-  max-width: 220px;
-  height: auto;
-  transition: all 0.3s ease;
-}
-
-header.shrink img {
-  max-width: 140px;
-}
-
-
     #buscador-container {
       display: flex;
       justify-content: center;
@@ -409,17 +394,8 @@ h2 {
   let lastScroll = window.scrollY;
 
   window.addEventListener('scroll', () => {
-    const currentScroll = window.scrollY;
-    irArriba.style.display = currentScroll > 300 ? 'block' : 'none';
-
-    if (currentScroll > 50 && currentScroll > lastScroll) {
-      header.classList.add('shrink');
-    } else if (currentScroll < 50) {
-      header.classList.remove('shrink');
-    }
-
-    lastScroll = currentScroll;
-  }, { passive: true }); // ✅ Esta línea previene la vibración
+  irArriba.style.display = window.scrollY > 300 ? 'block' : 'none';
+}, { passive: true }); // ✅ Esta línea previene la vibración
 
   irArriba?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
