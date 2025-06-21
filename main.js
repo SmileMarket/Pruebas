@@ -239,26 +239,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cuponValido = cupones.find(c => c.codigo === codigoIngresado);
         if (cuponValido) {
           descuento = cuponValido.descuento;
+          const montoDescuento = total * (descuento / 100);
+          const totalConDescuento = total - montoDescuento;
+
           if (feedback) {
-            feedback.textContent = `Cupón aplicado: ${descuento}% de descuento`;
+            feedback.textContent = `Cupón aplicado: -${descuento}% ($${montoDescuento.toLocaleString()})`;
             feedback.style.color = 'green';
           }
+
+          resumen.innerHTML += `<div style="margin-top: 0.5rem;">Descuento: -$${montoDescuento.toLocaleString()}</div>`;
+          resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total con descuento: $${totalConDescuento.toLocaleString()}</div>`;
+          total = totalConDescuento;
         } else {
           if (feedback) {
             feedback.textContent = 'Cupón no válido';
             feedback.style.color = 'red';
           }
+          resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
         }
+      } else {
+        resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
       }
 
-      mensaje += `\nSubtotal: $${total.toLocaleString()}`;
-      if (descuento > 0) {
-        const descuentoAplicado = total * (descuento / 100);
-        total -= descuentoAplicado;
-        mensaje += `\nDescuento (${descuento}%): -$${descuentoAplicado.toLocaleString()}`;
-      }
       mensaje += `\nTotal: $${total.toLocaleString()}`;
-      resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
 
       document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
       document.getElementById('resumen-modal').style.display = 'flex';
@@ -276,4 +279,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('resumen-modal').style.display = 'none';
   });
 });
-
