@@ -221,6 +221,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resumen = document.getElementById('resumen-contenido');
   const inputCupon = document.getElementById('cupon');
   const feedback = document.getElementById('cupon-feedback');
+  const btnValidarCupon = document.getElementById('validar-cupon');
+
+  let codigoValidado = '';
+  let porcentajeDescuento = 0;
 
   function calcularResumen() {
     resumen.innerHTML = '';
@@ -238,31 +242,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     mensaje += `\nSubtotal: $${total.toLocaleString()}`;
 
     let totalConDescuento = total;
-    let descuento = 0;
 
-    const codigoIngresado = inputCupon?.value.trim().toUpperCase();
-    if (codigoIngresado) {
-      const cuponValido = cupones.find(c => c.codigo === codigoIngresado);
-      if (cuponValido) {
-        descuento = cuponValido.descuento;
-        const descuentoAplicado = total * (descuento / 100);
-        totalConDescuento = total - descuentoAplicado;
+    if (codigoValidado && porcentajeDescuento > 0) {
+      const descuentoAplicado = total * (porcentajeDescuento / 100);
+      totalConDescuento -= descuentoAplicado;
 
-        if (feedback) {
-          feedback.textContent = `Cupón aplicado: -${descuento}% ($${descuentoAplicado.toLocaleString()})`;
-          feedback.style.color = 'green';
-        }
+      resumen.innerHTML += `<div>Descuento: -$${descuentoAplicado.toLocaleString()}</div>`;
+      resumen.innerHTML += `<div style="margin-top: 0.5rem; font-weight: bold;">Total: $${totalConDescuento.toLocaleString()}</div>`;
 
-        resumen.innerHTML += `<div>Descuento: -$${descuentoAplicado.toLocaleString()}</div>`;
-        resumen.innerHTML += `<div style="margin-top: 0.5rem; font-weight: bold;">Total: $${totalConDescuento.toLocaleString()}</div>`;
-        mensaje += `\nDescuento (${descuento}%): -$${descuentoAplicado.toLocaleString()}`;
-      } else {
-        if (feedback) {
-          feedback.textContent = 'Cupón no válido';
-          feedback.style.color = 'red';
-        }
-        resumen.innerHTML += `<div style="margin-top: 0.5rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
-      }
+      mensaje += `\nDescuento (${porcentajeDescuento}%): -$${descuentoAplicado.toLocaleString()}`;
     } else {
       resumen.innerHTML += `<div style="margin-top: 0.5rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
     }
@@ -270,6 +258,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     mensaje += `\nTotal: $${totalConDescuento.toLocaleString()}`;
     document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
   }
+
+  btnValidarCupon?.addEventListener('click', () => {
+    const codigoIngresado = inputCupon?.value.trim().toUpperCase();
+    const cuponValido = cupones.find(c => c.codigo === codigoIngresado);
+
+    if (cuponValido) {
+      codigoValidado = cuponValido.codigo;
+      porcentajeDescuento = cuponValido.descuento;
+      feedback.textContent = `Cupón aplicado: -${porcentajeDescuento}% de descuento`;
+      feedback.style.color = 'green';
+    } else {
+      codigoValidado = '';
+      porcentajeDescuento = 0;
+      feedback.textContent = 'Cupón no válido';
+      feedback.style.color = 'red';
+    }
+
+    calcularResumen();
+  });
 
   const confirmarBtn = document.getElementById('confirmar');
   confirmarBtn?.addEventListener('click', () => {
@@ -279,12 +286,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     calcularResumen();
     document.getElementById('resumen-modal').style.display = 'flex';
-  });
-
-  inputCupon?.addEventListener('input', () => {
-    if (document.getElementById('resumen-modal').style.display === 'flex') {
-      calcularResumen();
-    }
   });
 
   document.getElementById('enviar-whatsapp')?.addEventListener('click', () => {
