@@ -37,94 +37,55 @@ async function cargarCuponesDesdeGoogleSheet() {
     const columnas = linea.split(',').map(c => c.trim());
     const fila = Object.fromEntries(headers.map((h, i) => [h, columnas[i] || '']));
     return {
-      codigo: fila.codigo?.toUpperCase() || '',
-      descuento: parseFloat(fila.descuento) || 0
+      codigo: fila.Codigo?.toUpperCase() || '',
+      descuento: parseFloat(fila.Descuento) || 0
     };
   });
 }
 
-function agregarAlCarrito(boton) {
-  const producto = boton.closest('.producto');
-  const nombre = producto.dataset.nombre;
-  const precio = parseFloat(producto.dataset.precio);
-  const cantidad = parseInt(producto.querySelector('.cantidad-input').value);
+function calcularTotalConCupon() {
+  const resumen = document.getElementById('resumen-contenido');
+  const inputCupon = document.getElementById('cupon');
+  const feedback = document.getElementById('cupon-feedback');
+  const codigoIngresado = inputCupon?.value.trim().toUpperCase();
+  let total = carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
-  const existente = carrito.find(item => item.nombre === nombre);
-  if (existente) {
-    existente.cantidad += cantidad;
-  } else {
-    carrito.push({ nombre, precio, cantidad });
-  }
+  let mensaje = 'Hola! Quiero realizar una compra:\n';
+  resumen.innerHTML = '';
 
-  mostrarPopup();
-  animarCarrito();
-  actualizarCarrito();
-}
-
-function eliminarDelCarrito(index) {
-  carrito.splice(index, 1);
-  actualizarCarrito();
-}
-
-function actualizarCarrito() {
-  const carritoItems = document.getElementById('carrito-items');
-  carritoItems.innerHTML = '';
-  let total = 0;
-  let cantidadTotal = 0;
-
-  carrito.forEach((item, index) => {
-    const itemDiv = document.createElement('div');
-    itemDiv.className = 'carrito-item';
-    itemDiv.innerHTML = `
-      <div>${item.nombre} x ${item.cantidad}</div>
-      <div>$${(item.precio * item.cantidad).toLocaleString()}</div>
-      <button onclick="eliminarDelCarrito(${index})">&times;</button>
-    `;
-    carritoItems.appendChild(itemDiv);
-    total += item.precio * item.cantidad;
-    cantidadTotal += item.cantidad;
+  carrito.forEach(item => {
+    const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
+    resumen.innerHTML += `<div style="margin-bottom: 0.4rem;">${linea}</div>`;
+    mensaje += `• ${linea}\n`;
   });
 
-  document.getElementById('total').textContent = 'Total: $' + total.toLocaleString();
-  document.getElementById('contador-carrito').textContent = cantidadTotal;
-}
+  mensaje += `\nSubtotal: $${total.toLocaleString()}`;
+  resumen.innerHTML += `<div style="margin-top: 1rem;">Subtotal: $${total.toLocaleString()}</div>`;
 
-function mostrarPopup() {
-  const popup = document.getElementById('popup');
-  if (popup) {
-    popup.style.display = 'block';
-    setTimeout(() => {
-      popup.style.display = 'none';
-    }, 1000);
+  let descuento = 0;
+  let descuentoAplicado = 0;
+  if (codigoIngresado) {
+    const cuponValido = cupones.find(c => c.codigo === codigoIngresado);
+    if (cuponValido) {
+      descuento = cuponValido.descuento;
+      descuentoAplicado = total * (descuento / 100);
+      total -= descuentoAplicado;
+      feedback.textContent = `Cupón aplicado: ${descuento}% de descuento`;
+      feedback.style.color = 'green';
+      mensaje += `\nDescuento (${descuento}%): -$${descuentoAplicado.toLocaleString()}`;
+      resumen.innerHTML += `<div>Descuento (${descuento}%): -$${descuentoAplicado.toLocaleString()}</div>`;
+    } else {
+      feedback.textContent = 'Cupón no válido';
+      feedback.style.color = 'red';
+    }
+  } else {
+    feedback.textContent = '';
   }
-}
 
-function cambiarCantidad(boton, delta) {
-  const input = boton.parentElement.querySelector('.cantidad-input');
-  let cantidad = parseInt(input.value) || 1;
-  cantidad += delta;
-  if (cantidad < 1) cantidad = 1;
-  input.value = cantidad;
-}
+  mensaje += `\nTotal: $${total.toLocaleString()}`;
+  resumen.innerHTML += `<div style="font-weight:bold;margin-top:0.5rem;">Total: $${total.toLocaleString()}</div>`;
 
-function mostrarModalInfo(nombre, descripcion) {
-  document.getElementById('modal-titulo').textContent = nombre;
-  document.getElementById('modal-descripcion').textContent = descripcion;
-  document.getElementById('info-modal').style.display = 'flex';
-}
-
-function cerrarModalInfo() {
-  document.getElementById('info-modal').style.display = 'none';
-}
-
-function animarCarrito() {
-  const icono = document.getElementById('carrito-icono');
-  if (icono) {
-    icono.classList.remove('vibrar');
-    void icono.offsetWidth;
-    icono.classList.add('vibrar');
-    setTimeout(() => icono.classList.remove('vibrar'), 500);
-  }
+  document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -217,56 +178,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('Tu carrito está vacío.');
         return;
       }
-
-      const resumen = document.getElementById('resumen-contenido');
-      resumen.innerHTML = '';
-      let mensaje = 'Hola! Quiero realizar una compra:\n';
-      let total = 0;
-
-      carrito.forEach(item => {
-        const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
-        resumen.innerHTML += `<div style="margin-bottom: 0.4rem;">${linea}</div>`;
-        mensaje += `• ${linea}\n`;
-        total += item.precio * item.cantidad;
-      });
-
-      const inputCupon = document.getElementById('cupon');
-      const feedback = document.getElementById('cupon-feedback');
-      const codigoIngresado = inputCupon?.value.trim().toUpperCase();
-
-      let descuento = 0;
-      if (codigoIngresado) {
-        const cuponValido = cupones.find(c => c.codigo === codigoIngresado);
-        if (cuponValido) {
-          descuento = cuponValido.descuento;
-          const montoDescuento = total * (descuento / 100);
-          const totalConDescuento = total - montoDescuento;
-
-          if (feedback) {
-            feedback.textContent = `Cupón aplicado: -${descuento}% ($${montoDescuento.toLocaleString()})`;
-            feedback.style.color = 'green';
-          }
-
-          resumen.innerHTML += `<div style="margin-top: 0.5rem;">Descuento: -$${montoDescuento.toLocaleString()}</div>`;
-          resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total con descuento: $${totalConDescuento.toLocaleString()}</div>`;
-          total = totalConDescuento;
-        } else {
-          if (feedback) {
-            feedback.textContent = 'Cupón no válido';
-            feedback.style.color = 'red';
-          }
-          resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
-        }
-      } else {
-        resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
-      }
-
-      mensaje += `\nTotal: $${total.toLocaleString()}`;
-
-      document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
+      calcularTotalConCupon();
       document.getElementById('resumen-modal').style.display = 'flex';
     });
   }
+
+  document.getElementById('cupon')?.addEventListener('input', calcularTotalConCupon);
 
   document.getElementById('enviar-whatsapp')?.addEventListener('click', () => {
     const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
