@@ -1,5 +1,6 @@
 const carrito = [];
 let productos = [];
+let cupones = [];
 
 async function cargarProductosDesdeGoogleSheet() {
   const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=1670706691&single=true&output=csv';
@@ -21,6 +22,23 @@ async function cargarProductosDesdeGoogleSheet() {
       nuevo: producto.nuevo === 'TRUE',
       masVendido: producto.masVendido === 'TRUE',
       recomendado: producto.recomendado === 'TRUE'
+    };
+  });
+}
+
+async function cargarCuponesDesdeGoogleSheet() {
+  const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=713979488&single=true&output=csv';
+  const response = await fetch(urlCSV);
+  const texto = await response.text();
+  const lineas = texto.split('\n').filter(l => l.trim() !== '');
+  const headers = lineas[0].split(',').map(h => h.trim());
+
+  cupones = lineas.slice(1).map(linea => {
+    const columnas = linea.split(',').map(c => c.trim());
+    const fila = Object.fromEntries(headers.map((h, i) => [h, columnas[i] || '']));
+    return {
+      codigo: fila.codigo?.toUpperCase() || '',
+      descuento: parseFloat(fila.descuento) || 0
     };
   });
 }
@@ -111,6 +129,7 @@ function animarCarrito() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await cargarProductosDesdeGoogleSheet();
+  await cargarCuponesDesdeGoogleSheet();
 
   const contenedor = document.getElementById('productos');
   const productosPorCategoria = {};
@@ -211,6 +230,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         total += item.precio * item.cantidad;
       });
 
+      const inputCupon = document.getElementById('cupon');
+      const feedback = document.getElementById('cupon-feedback');
+      const codigoIngresado = inputCupon?.value.trim().toUpperCase();
+
+      let descuento = 0;
+      if (codigoIngresado) {
+        const cuponValido = cupones.find(c => c.codigo === codigoIngresado);
+        if (cuponValido) {
+          descuento = cuponValido.descuento;
+          if (feedback) {
+            feedback.textContent = `Cupón aplicado: ${descuento}% de descuento`;
+            feedback.style.color = 'green';
+          }
+        } else {
+          if (feedback) {
+            feedback.textContent = 'Cupón no válido';
+            feedback.style.color = 'red';
+          }
+        }
+      }
+
+      mensaje += `\nSubtotal: $${total.toLocaleString()}`;
+      if (descuento > 0) {
+        const descuentoAplicado = total * (descuento / 100);
+        total -= descuentoAplicado;
+        mensaje += `\nDescuento (${descuento}%): -$${descuentoAplicado.toLocaleString()}`;
+      }
       mensaje += `\nTotal: $${total.toLocaleString()}`;
       resumen.innerHTML += `<div style="margin-top: 1rem; font-weight: bold;">Total: $${total.toLocaleString()}</div>`;
 
@@ -230,3 +276,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('resumen-modal').style.display = 'none';
   });
 });
+
