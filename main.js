@@ -2,6 +2,8 @@ const carrito = [];
 let productos = [];
 let cupones = [];
 let cuponAplicado = null;
+let totalGlobal = 0;
+let descuentoGlobal = 0;
 
 async function cargarProductosDesdeGoogleSheet() {
   const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=1670706691&single=true&output=csv';
@@ -12,7 +14,7 @@ async function cargarProductosDesdeGoogleSheet() {
 
   productos = lineas.slice(1).map(linea => {
     const columnas = linea.split(',').map(c => c.trim());
-    const producto = Object.fromEntries(headers.map((h, i) => [h, columnas[i] || '']));
+    const producto = Object.fromEntries(headers.map((h, i) => [h.toLowerCase(), columnas[i] || '']));
     return {
       nombre: producto.nombre || 'Sin nombre',
       categoria: producto.categoria || 'Sin categoría',
@@ -21,7 +23,7 @@ async function cargarProductosDesdeGoogleSheet() {
       imagen: producto.imagen || '',
       stock: parseInt(producto.stock) || 0,
       nuevo: producto.nuevo === 'TRUE',
-      masVendido: producto.masVendido === 'TRUE',
+      masvendido: producto.masvendido === 'TRUE',
       recomendado: producto.recomendado === 'TRUE'
     };
   });
@@ -32,11 +34,11 @@ async function cargarCuponesDesdeGoogleSheet() {
   const response = await fetch(urlCSV);
   const texto = await response.text();
   const lineas = texto.split('\n').filter(l => l.trim() !== '');
-  const headers = lineas[0].split(',').map(h => h.trim());
+  const headers = lineas[0].split(',').map(h => h.trim().toLowerCase());
 
   cupones = lineas.slice(1).map(linea => {
     const columnas = linea.split(',').map(c => c.trim());
-    const fila = Object.fromEntries(headers.map((h, i) => [h.toLowerCase(), columnas[i] || '']));
+    const fila = Object.fromEntries(headers.map((h, i) => [h, columnas[i] || '']));
     return {
       codigo: fila.codigo?.toUpperCase() || '',
       descuento: parseFloat(fila.descuento) || 0
@@ -126,6 +128,7 @@ function animarCarrito() {
     setTimeout(() => icono.classList.remove('vibrar'), 500);
   }
 }
+
 document.addEventListener('DOMContentLoaded', async () => {
   await cargarProductosDesdeGoogleSheet();
   await cargarCuponesDesdeGoogleSheet();
@@ -140,7 +143,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     productosPorCategoria[categoria].push(producto);
   });
-
   for (const categoria in productosPorCategoria) {
     const grupo = document.createElement('div');
     grupo.className = 'grupo-categoria';
@@ -230,14 +232,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       const montoDescuento = totalGlobal * (descuentoGlobal / 100);
       const totalConDescuento = totalGlobal - montoDescuento;
 
-      resumen.innerHTML += `<div>Descuento: -$${montoDescuento.toLocaleString()}</div>`;
-      resumen.innerHTML += `<div style="font-weight:bold;">Total con descuento: $${totalConDescuento.toLocaleString()}</div>`;
+      resumen.innerHTML += `<div>Descuento (${descuentoGlobal}%): -$${montoDescuento.toLocaleString()}</div>`;
+      resumen.innerHTML += `<div style="font-weight:bold;">Total: $${totalConDescuento.toLocaleString()}</div>`;
       totalGlobal = totalConDescuento;
+
+      mensaje += `\nSubtotal: $${(totalGlobal + montoDescuento).toLocaleString()}`;
+      mensaje += `\nDescuento (${descuentoGlobal}%): -$${montoDescuento.toLocaleString()}`;
+      mensaje += `\nTotal: $${totalConDescuento.toLocaleString()}`;
     } else {
       resumen.innerHTML += `<div style="font-weight:bold;">Total: $${totalGlobal.toLocaleString()}</div>`;
+      mensaje += `\nTotal: $${totalGlobal.toLocaleString()}`;
     }
 
-    document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje + `\nTotal: $${totalGlobal.toLocaleString()}`;
+    document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
   }
 
   document.getElementById('confirmar')?.addEventListener('click', () => {
