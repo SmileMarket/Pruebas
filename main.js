@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const etiquetas = [];
       if (producto.nuevo) etiquetas.push('🆕 Nuevo');
-      if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
+      if (producto.masvendido) etiquetas.push('🔥 Muy vendido');
       if (producto.recomendado) etiquetas.push('⭐ Recomendado');
 
       const etiquetasHTML = etiquetas.length > 0
@@ -284,8 +284,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     calcularResumen();
   });
 
-  document.getElementById('enviar-whatsapp')?.addEventListener('click', () => {
+  // -- CAMBIO PRINCIPAL: Enviar pedido a Google Sheets y abrir WhatsApp --
+  document.getElementById('enviar-whatsapp')?.addEventListener('click', async () => {
     const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
+    const urlGoogleAppsScript = 'https://script.google.com/macros/s/AKfycbxqY7FFjeF92IABfgGHenH7lMURYGSyH95EG-27jhVQcIfCr_H8jdavvdHvEuh-3Q4/exec';
+
+    // Envío a Google Sheets vía Apps Script
+    try {
+      const response = await fetch(urlGoogleAppsScript, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cliente: "Cliente Web",
+          pedido: mensaje,
+          total: totalGlobal
+        })
+      });
+      const data = await response.json();
+      if (data.result === 'ok') {
+        console.log('Pedido guardado correctamente en Google Sheets');
+      } else {
+        console.error('Error guardando pedido:', data.message);
+      }
+    } catch (error) {
+      console.error('Error enviando pedido a Google Sheets:', error);
+    }
+
+    // Abrir WhatsApp igual que antes
     const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
     document.getElementById('resumen-modal').style.display = 'none';
