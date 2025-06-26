@@ -16,47 +16,21 @@
       background: #f9f9f9;
       color: #333;
       overflow-x: hidden;
-    }
+}
+header {
+  position: sticky;
+  top: 0;
+  background: #f7b0f7;
+  z-index: 1001;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-height: 90px;
+}
 
-    #splash {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .spinner {
-      border: 6px solid #eee;
-      border-top: 6px solid #f7b0f7;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: girar 1s linear infinite;
-    }
-
-    @keyframes girar {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      background: #f7b0f7;
-      z-index: 1001;
-      padding: 0.5rem 1rem;
-      text-align: center;
-      min-height: 90px;
-    }
-
-    header img {
-      max-width: 180px;
-      height: auto;
-    }
+header img {
+  max-width: 180px;
+  height: auto;
+}
 
     #buscador-container {
       display: flex;
@@ -73,19 +47,19 @@
       font-size: 1rem;
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 2rem auto;
-      padding: 3rem 1rem 1rem;
-      transition: padding-top 0.3s ease;
-    }
+.container {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 3rem 1rem 1rem; /* ← más espacio arriba para evitar vibración scroll inicial */
+  transition: padding-top 0.3s ease;
+}
 
-    h2 {
-      border-bottom: 2px solid #f5a2f5;
-      padding-bottom: .3rem;
-      margin: 1.5rem 0 1rem;
-      color: #007b7f;
-    }
+h2 {
+  border-bottom: 2px solid #f5a2f5;
+  padding-bottom: .3rem;
+  margin: 1.5rem 0 1rem; /* ← Agrega margen arriba para evitar vibración */
+  color: #007b7f;
+}
 
     .productos {
       display: flex;
@@ -138,6 +112,7 @@
       gap: 8px;
       margin-bottom: 0.7rem;
     }
+
     .control-cantidad button {
       width: 32px;
       height: 32px;
@@ -359,16 +334,6 @@
   </style>
 </head>
 <body>
-  <!-- Splash de carga -->
-  <div id="splash" style="position:fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; align-items:center; justify-content:center; z-index:9999;">
-    <div style="border: 6px solid #f3f3f3; border-top: 6px solid #f7b0f7; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
-  </div>
-  <style>
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
 
   <header id="main-header">
     <img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg" alt="Logo SmileMarket" />
@@ -382,39 +347,80 @@
     <div id="productos" class="productos"></div>
   </div>
 
-  <!-- ... CONTINÚA el resto del HTML sin modificaciones -->
+    <div id="carrito">
+      <button id="cerrar-carrito">&times;</button>
+      <h2>Carrito</h2>
+      <div id="carrito-items"></div>
+      <div id="total">Total: $0</div>
+      <button id="confirmar">Confirmar compra</button>
+    </div>
+
+    <div id="popup">Producto agregado al carrito</div>
+
+    <div id="resumen-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
+      <div style="background:white; padding:20px; border-radius:8px; width:90%; max-width:400px;">
+        <h2>Resumen de tu pedido</h2>
+<div id="resumen-contenido" style="margin-bottom:1rem;"></div>
+
+<div style="margin-bottom: 1rem;">
+  <label for="cupon" style="font-weight: bold;">Código de descuento:</label><br>
+  <input type="text" id="cupon" placeholder="Ingresá tu cupón" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;" />
+  <button id="aplicar-cupon" class="boton" style="margin-top: 0.5rem; background: #007b7f;">Agregar código</button>
+  <div id="cupon-feedback" style="color: red; font-size: 0.9rem; margin-top: 4px;"></div>
+</div>
+
+
+        <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px;">Enviar por WhatsApp</button>
+        <button id="seguir-comprando" class="boton" style="background:#ccc;color:#333;">Seguir comprando</button>
+      </div>
+    </div>
+
+    <div id="info-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
+      <div style="background:white; padding:20px; border-radius:6px; max-width:400px; width:90%; position:relative;">
+        <button onclick="cerrarModalInfo()" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+        <h3 id="modal-titulo"></h3>
+        <p id="modal-descripcion" style="margin-top: 1rem;"></p>
+      </div>
+    </div>
+
+    <a href="https://wa.me/5491130335334?text=¡Hola!%20Tengo%20una%20consulta" class="float-button whatsapp-float" target="_blank">💬</a>
+
+    <a href="#carrito" class="float-button carrito-float" id="carrito-icono">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      <span id="contador-carrito">0</span>
+    </a>
+
+    <a href="https://www.instagram.com/smilemarket.ar" target="_blank" class="float-button instagram-float">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" width="24" height="24" />
+    </a>
+
+    <div id="ir-arriba" title="Volver arriba">⬆</div>
 
   <script src="main.js"></script>
-  <script>
-    const irArriba = document.getElementById('ir-arriba');
-    const header = document.getElementById('main-header');
+<script>
+  const irArriba = document.getElementById('ir-arriba');
+  const header = document.getElementById('main-header');
+  let lastScroll = window.scrollY;
 
-    window.addEventListener('scroll', () => {
-      irArriba.style.display = window.scrollY > 300 ? 'block' : 'none';
-    }, { passive: true });
+  window.addEventListener('scroll', () => {
+  irArriba.style.display = window.scrollY > 300 ? 'block' : 'none';
+}, { passive: true }); // ✅ Esta línea previene la vibración
 
-    irArriba?.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+  irArriba?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-    document.getElementById('cerrar-carrito')?.addEventListener('click', () => {
-      document.getElementById('carrito')?.classList.remove('mostrar');
-    });
+  document.getElementById('cerrar-carrito')?.addEventListener('click', () => {
+    document.getElementById('carrito')?.classList.remove('mostrar');
+  });
 
-    document.getElementById('seguir-comprando')?.addEventListener('click', () => {
-      document.getElementById('resumen-modal').style.display = 'none';
-    });
-
-    // Ocultar splash al cargar productos
-    window.addEventListener('load', () => {
-      const intervalo = setInterval(() => {
-        const productosCargados = document.querySelectorAll('#productos .producto').length;
-        if (productosCargados > 0) {
-          clearInterval(intervalo);
-          document.getElementById('splash')?.remove();
-        }
-      }, 200);
-    });
-  </script>
+  document.getElementById('seguir-comprando')?.addEventListener('click', () => {
+    document.getElementById('resumen-modal').style.display = 'none';
+  });
+</script>
 </body>
 </html>
