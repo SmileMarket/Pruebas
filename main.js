@@ -100,7 +100,6 @@ function mostrarPopup() {
     }, 1000);
   }
 }
-
 function cambiarCantidad(boton, delta) {
   const input = boton.parentElement.querySelector('.cantidad-input');
   let cantidad = parseInt(input.value) || 1;
@@ -143,6 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     productosPorCategoria[categoria].push(producto);
   });
+
   for (const categoria in productosPorCategoria) {
     const grupo = document.createElement('div');
     grupo.className = 'grupo-categoria';
@@ -153,7 +153,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const contenedorCategoria = document.createElement('div');
     contenedorCategoria.className = 'productos';
-
     productosPorCategoria[categoria].forEach(producto => {
       const div = document.createElement('div');
       div.className = 'producto';
@@ -164,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const etiquetas = [];
       if (producto.nuevo) etiquetas.push('🆕 Nuevo');
-      if (producto.masvendido) etiquetas.push('🔥 Muy vendido');
+      if (producto.masVendido) etiquetas.push('🔥 Muy vendido');
       if (producto.recomendado) etiquetas.push('⭐ Recomendado');
 
       const etiquetasHTML = etiquetas.length > 0
@@ -210,9 +209,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  let totalGlobal = 0;
-  let descuentoGlobal = 0;
+  // Agregar inputs al modal
+  const resumenModal = document.getElementById('resumen-contenido');
+  const modalContainer = document.getElementById('resumen-modal')?.querySelector('div');
 
+  const nombreInput = document.createElement('input');
+  nombreInput.id = 'input-nombre';
+  nombreInput.placeholder = 'Nombre y Apellido';
+  nombreInput.style = 'width: 100%; padding: 8px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px;';
+  modalContainer.insertBefore(nombreInput, document.getElementById('cupon').parentElement);
+
+  const whatsappInput = document.createElement('input');
+  whatsappInput.id = 'input-whatsapp';
+  whatsappInput.placeholder = 'Teléfono (ej: 11xxxxxxxx)';
+  whatsappInput.style = 'width: 100%; padding: 8px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px;';
+  modalContainer.insertBefore(whatsappInput, document.getElementById('cupon').parentElement);
+  
   function calcularResumen() {
     const resumen = document.getElementById('resumen-contenido');
     resumen.innerHTML = '';
@@ -246,7 +258,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
   }
-
   document.getElementById('confirmar')?.addEventListener('click', () => {
     if (carrito.length === 0) {
       alert('Tu carrito está vacío.');
@@ -284,33 +295,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     calcularResumen();
   });
 
-  // -- CAMBIO PRINCIPAL: Enviar pedido a Google Sheets y abrir WhatsApp --
   document.getElementById('enviar-whatsapp')?.addEventListener('click', async () => {
-    const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
-    const urlGoogleAppsScript = 'https://script.google.com/macros/s/AKfycbxqY7FFjeF92IABfgGHenH7lMURYGSyH95EG-27jhVQcIfCr_H8jdavvdHvEuh-3Q4/exec';
-
-    // Envío a Google Sheets vía Apps Script
-    try {
-      const response = await fetch(urlGoogleAppsScript, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cliente: "Cliente Web",
-          pedido: mensaje,
-          total: totalGlobal
-        })
-      });
-      const data = await response.json();
-      if (data.result === 'ok') {
-        console.log('Pedido guardado correctamente en Google Sheets');
-      } else {
-        console.error('Error guardando pedido:', data.message);
-      }
-    } catch (error) {
-      console.error('Error enviando pedido a Google Sheets:', error);
+    const nombre = document.getElementById('input-nombre')?.value.trim();
+    const whatsapp = document.getElementById('input-whatsapp')?.value.trim();
+    if (!nombre || !whatsapp) {
+      alert('Por favor, completá tu nombre y número de WhatsApp.');
+      return;
     }
 
-    // Abrir WhatsApp igual que antes
+    const now = new Date();
+    const fecha = now.toLocaleDateString('es-AR');
+    const mes = now.toLocaleString('es-AR', { month: 'long' });
+    const mercaderia = carrito.map(p => `${p.nombre} x ${p.cantidad} ($${(p.precio * p.cantidad).toLocaleString()})`).join(' | ');
+    const cantidadPrecio = carrito.map(p => `${p.cantidad} x $${p.precio.toLocaleString()}`).join(' | ');
+    const total = totalGlobal.toLocaleString();
+
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbwQq95YZ7ln_7dRA-oQcfKmuJ9bQmcdTv7BxPKSlvkmSrlYJiD04BJ5-HJVrzCr0Gg/exec", {
+        method: "POST",
+        body: JSON.stringify({
+          mes, comprador: nombre, whatsapp, fecha, mercaderia, cantidad_precio: cantidadPrecio, total
+        }),
+        headers: { "Content-Type": "application/json" }
+      });
+    } catch (e) {
+      console.error('Error al guardar en Sheets:', e);
+    }
+
+    const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
     const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
     document.getElementById('resumen-modal').style.display = 'none';
