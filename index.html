@@ -20,8 +20,10 @@
 
     #splash {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: white;
       display: flex;
       justify-content: center;
@@ -29,18 +31,14 @@
       z-index: 9999;
     }
 
-    .spinner {
-      border: 6px solid #eee;
-      border-top: 6px solid #f7b0f7;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: girar 1s linear infinite;
+    .logo-cargando {
+      max-width: 280px;
+      animation: parpadeo 1s infinite ease-in-out;
     }
 
-    @keyframes girar {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes parpadeo {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
 
     header {
@@ -104,7 +102,6 @@
       flex-direction: column;
       align-items: center;
     }
-
     .producto img {
       width: 100%;
       height: 160px;
@@ -138,6 +135,7 @@
       gap: 8px;
       margin-bottom: 0.7rem;
     }
+
     .control-cantidad button {
       width: 32px;
       height: 32px;
@@ -203,7 +201,6 @@
       font-weight: bold;
       z-index: 3;
     }
-
     #popup {
       position: fixed;
       bottom: 20px;
@@ -333,6 +330,37 @@
       display: none;
     }
 
+    #splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: white;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #splash img {
+      max-width: 200px;
+      animation: parpadeo 1.2s infinite;
+    }
+
+    #splash span {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: #555;
+      font-weight: bold;
+    }
+
+    @keyframes parpadeo {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
     @keyframes vibrar {
       0% { transform: translate(0); }
       25% { transform: translate(-2px, 2px); }
@@ -344,7 +372,6 @@
     .vibrar {
       animation: vibrar 0.3s ease;
     }
-
     @media (max-width: 768px) {
       header img { max-width: 180px; }
       .producto { width: 45%; }
@@ -359,33 +386,34 @@
   </style>
 </head>
 <body>
-  <!-- Splash de carga -->
-  <div id="splash" style="position:fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; align-items:center; justify-content:center; z-index:9999;">
-    <div style="border: 6px solid #f3f3f3; border-top: 6px solid #f7b0f7; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
-  </div>
-  <style>
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
 
-  <header id="main-header">
+  <div id="splash">
+    <img src="https://github.com/SmileMarket/Pruebas/blob/main/img/cargando-odontologia.png?raw=true" alt="Cargando SmileMarket" />
+    <span>Cargando...</span>
+  </div>
+
+  <header id="main-header" style="display: none;">
     <img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg" alt="Logo SmileMarket" />
     <div id="buscador-container">
       <input type="text" id="buscador" placeholder="Buscar productos..." />
     </div>
   </header>
 
-  <div class="container">
+  <div class="container" style="display: none;">
     <h2>Productos</h2>
     <div id="productos" class="productos"></div>
   </div>
 
-  <!-- ... CONTINÚA el resto del HTML sin modificaciones -->
+  <!-- Resto del HTML continúa normalmente -->
 
   <script src="main.js"></script>
   <script>
+    window.addEventListener('load', () => {
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('main-header').style.display = 'block';
+      document.querySelector('.container').style.display = 'block';
+    });
+
     const irArriba = document.getElementById('ir-arriba');
     const header = document.getElementById('main-header');
 
@@ -403,17 +431,6 @@
 
     document.getElementById('seguir-comprando')?.addEventListener('click', () => {
       document.getElementById('resumen-modal').style.display = 'none';
-    });
-
-    // Ocultar splash al cargar productos
-    window.addEventListener('load', () => {
-      const intervalo = setInterval(() => {
-        const productosCargados = document.querySelectorAll('#productos .producto').length;
-        if (productosCargados > 0) {
-          clearInterval(intervalo);
-          document.getElementById('splash')?.remove();
-        }
-      }, 200);
     });
   </script>
 </body>
