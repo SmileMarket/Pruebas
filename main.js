@@ -41,7 +41,8 @@ async function cargarCuponesDesdeGoogleSheet() {
     const fila = Object.fromEntries(headers.map((h, i) => [h, columnas[i] || '']));
     return {
       codigo: fila.codigo?.toUpperCase() || '',
-      descuento: parseFloat(fila.descuento) || 0
+      descuento: parseFloat(fila.descuento) || 0,
+      producto: fila.producto?.toUpperCase() || ''
     };
   });
 }
@@ -100,6 +101,7 @@ function mostrarPopup() {
     }, 1000);
   }
 }
+
 function cambiarCantidad(boton, delta) {
   const input = boton.parentElement.querySelector('.cantidad-input');
   let cantidad = parseInt(input.value) || 1;
@@ -107,7 +109,6 @@ function cambiarCantidad(boton, delta) {
   if (cantidad < 1) cantidad = 1;
   input.value = cantidad;
 }
-
 function mostrarModalInfo(nombre, descripcion) {
   document.getElementById('modal-titulo').textContent = nombre;
   document.getElementById('modal-descripcion').textContent = descripcion;
@@ -153,6 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const contenedorCategoria = document.createElement('div');
     contenedorCategoria.className = 'productos';
+
     productosPorCategoria[categoria].forEach(producto => {
       const div = document.createElement('div');
       div.className = 'producto';
@@ -199,6 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     grupo.appendChild(contenedorCategoria);
     contenedor.appendChild(grupo);
   }
+
   const carritoIcono = document.getElementById('carrito-icono');
   const carritoPanel = document.getElementById('carrito');
 
@@ -209,47 +212,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Agregar inputs al modal
-  const resumenModal = document.getElementById('resumen-contenido');
-  const modalContainer = document.getElementById('resumen-modal')?.querySelector('div');
-
-  const nombreInput = document.createElement('input');
-  nombreInput.id = 'input-nombre';
-  nombreInput.placeholder = 'Nombre y Apellido';
-  nombreInput.style = 'width: 100%; padding: 8px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px;';
-  modalContainer.insertBefore(nombreInput, document.getElementById('cupon').parentElement);
-
-  const whatsappInput = document.createElement('input');
-  whatsappInput.id = 'input-whatsapp';
-  whatsappInput.placeholder = 'Teléfono (ej: 11xxxxxxxx)';
-  whatsappInput.style = 'width: 100%; padding: 8px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px;';
-  modalContainer.insertBefore(whatsappInput, document.getElementById('cupon').parentElement);
-  
   function calcularResumen() {
     const resumen = document.getElementById('resumen-contenido');
     resumen.innerHTML = '';
     totalGlobal = 0;
+    let descuentoParcial = 0;
     let mensaje = 'Hola! Quiero realizar una compra:\n';
 
     carrito.forEach(item => {
-      const linea = `${item.nombre} x ${item.cantidad} - $${(item.precio * item.cantidad).toLocaleString()}`;
+      const subtotal = item.precio * item.cantidad;
+      totalGlobal += subtotal;
+
+      let aplicaDescuento = false;
+      if (cuponAplicado) {
+        aplicaDescuento = cuponAplicado.productos?.includes(item.nombre.toUpperCase());
+      }
+
+      if (aplicaDescuento) {
+        descuentoParcial += subtotal * (cuponAplicado.descuento / 100);
+      }
+
+      const linea = `${item.nombre} x ${item.cantidad} - $${subtotal.toLocaleString()}`;
       resumen.innerHTML += `<div style="margin-bottom: 0.4rem;">${linea}</div>`;
       mensaje += `• ${linea}\n`;
-      totalGlobal += item.precio * item.cantidad;
     });
 
     resumen.innerHTML += `<div style="margin-top: 1rem;">Subtotal: $${totalGlobal.toLocaleString()}</div>`;
 
-    if (descuentoGlobal > 0) {
-      const montoDescuento = totalGlobal * (descuentoGlobal / 100);
-      const totalConDescuento = totalGlobal - montoDescuento;
-
-      resumen.innerHTML += `<div>Descuento (${descuentoGlobal}%): -$${montoDescuento.toLocaleString()}</div>`;
+    if (descuentoParcial > 0) {
+      const totalConDescuento = totalGlobal - descuentoParcial;
+      resumen.innerHTML += `<div>Descuento (${cuponAplicado.descuento}%): -$${descuentoParcial.toLocaleString()}</div>`;
       resumen.innerHTML += `<div style="font-weight:bold;">Total: $${totalConDescuento.toLocaleString()}</div>`;
-      totalGlobal = totalConDescuento;
 
-      mensaje += `\nSubtotal: $${(totalGlobal + montoDescuento).toLocaleString()}`;
-      mensaje += `\nDescuento (${descuentoGlobal}%): -$${montoDescuento.toLocaleString()}`;
+      mensaje += `\nSubtotal: $${totalGlobal.toLocaleString()}`;
+      mensaje += `\nDescuento (${cuponAplicado.descuento}%): -$${descuentoParcial.toLocaleString()}`;
       mensaje += `\nTotal: $${totalConDescuento.toLocaleString()}`;
     } else {
       resumen.innerHTML += `<div style="font-weight:bold;">Total: $${totalGlobal.toLocaleString()}</div>`;
@@ -258,13 +254,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('enviar-whatsapp').dataset.mensaje = mensaje;
   }
+
   document.getElementById('confirmar')?.addEventListener('click', () => {
     if (carrito.length === 0) {
       alert('Tu carrito está vacío.');
       return;
     }
 
-    descuentoGlobal = 0;
     document.getElementById('cupon-feedback').textContent = '';
     document.getElementById('resumen-modal').style.display = 'flex';
     calcularResumen();
@@ -281,12 +277,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    const cuponValido = cupones.find(c => c.codigo === codigoIngresado);
-    if (cuponValido) {
-      descuentoGlobal = cuponValido.descuento;
-      feedback.textContent = `Cupón aplicado: ${descuentoGlobal}% de descuento`;
+    const coincidencias = cupones.filter(c => c.codigo === codigoIngresado);
+    if (coincidencias.length > 0) {
+      cuponAplicado = {
+        codigo: codigoIngresado,
+        descuento: coincidencias[0].descuento,
+        productos: coincidencias.map(c => c.producto)
+      };
+      descuentoGlobal = cuponAplicado.descuento;
+      feedback.textContent = `Cupón aplicado: ${descuentoGlobal}% en productos seleccionados`;
       feedback.style.color = 'green';
     } else {
+      cuponAplicado = null;
       descuentoGlobal = 0;
       feedback.textContent = 'Cupón no válido';
       feedback.style.color = 'red';
@@ -295,33 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     calcularResumen();
   });
 
-  document.getElementById('enviar-whatsapp')?.addEventListener('click', async () => {
-    const nombre = document.getElementById('input-nombre')?.value.trim();
-    const whatsapp = document.getElementById('input-whatsapp')?.value.trim();
-    if (!nombre || !whatsapp) {
-      alert('Por favor, completá tu nombre y número de WhatsApp.');
-      return;
-    }
-
-    const now = new Date();
-    const fecha = now.toLocaleDateString('es-AR');
-    const mes = now.toLocaleString('es-AR', { month: 'long' });
-    const mercaderia = carrito.map(p => `${p.nombre} x ${p.cantidad} ($${(p.precio * p.cantidad).toLocaleString()})`).join(' | ');
-    const cantidadPrecio = carrito.map(p => `${p.cantidad} x $${p.precio.toLocaleString()}`).join(' | ');
-    const total = totalGlobal.toLocaleString();
-
-    try {
-      await fetch("https://script.google.com/macros/s/AKfycbwQq95YZ7ln_7dRA-oQcfKmuJ9bQmcdTv7BxPKSlvkmSrlYJiD04BJ5-HJVrzCr0Gg/exec", {
-        method: "POST",
-        body: JSON.stringify({
-          mes, comprador: nombre, whatsapp, fecha, mercaderia, cantidad_precio: cantidadPrecio, total
-        }),
-        headers: { "Content-Type": "application/json" }
-      });
-    } catch (e) {
-      console.error('Error al guardar en Sheets:', e);
-    }
-
+  document.getElementById('enviar-whatsapp')?.addEventListener('click', () => {
     const mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje;
     const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
