@@ -176,27 +176,7 @@ function crearCardProducto(producto) {
         : '<div class="info-overlay">+ info</div>'}
     </div>` : '';
 
-  // urgencia / stock pequeño
-  const urgenciaHTML = (producto.stock > 0 && producto.stock <= 3) ? `<div class="stock-urgente">Quedan solo ${producto.stock} en stock</div>` : '';
-
-  div.innerHTML = `
-    ${imagenHTML}
-    <h3>${escapeHtml(producto.nombre)}</h3>
-    ${etiquetasHTML}
-    <p class="categoria-texto">${escapeHtml(producto.categoria)}</p>
-    <p class="precio">$ ${producto.precio.toLocaleString("es-AR")},00</p>
-    ${urgenciaHTML}
-    <div class="control-cantidad">
-      <button class="menos" onclick="cambiarCantidad(this, -1)" ${producto.stock <= 0 ? 'disabled' : ''}>−</button>
-      <input class="cantidad-input" type="number" value="1" min="1" readonly />
-      <button class="mas" onclick="cambiarCantidad(this, 1)" ${producto.stock <= 0 ? 'disabled' : ''}>+</button>
-    </div>
-    <button class="boton" onclick="agregarAlCarrito(this)" ${producto.stock <= 0 ? 'disabled style="background:#ccc;cursor:not-allowed;"' : ''}>
-      ${producto.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}
-    </button>
-  `;
-
-  return div;
+  
 }
 
 function renderizarProductos(productosAUsar) {
@@ -383,7 +363,7 @@ function agregarAlCarrito(boton) {
 
   // verificar cantidad solicitada <= stock
   if (cantidad > prodObj.stock) {
-    alert(`Solo quedan ${prodObj.stock} unidades en stock.`);
+    alert(``);
     return;
   }
 
@@ -523,7 +503,7 @@ function actualizarStockEnDOM(nombreProducto, nuevoStock) {
         if (!urg) {
           urg = document.createElement('div');
           urg.className = 'stock-urgente';
-          urg.textContent = `Quedan solo ${nuevoStock} en stock`;
+          urg.textContent = ``;
           boton.insertAdjacentElement('beforebegin', urg);
         } else {
           urg.textContent = ``;
