@@ -595,6 +595,24 @@ function actualizarMiniCarrito() {
   document.getElementById('contador-carrito').textContent = carrito.reduce((s, i) => s + i.cantidad, 0);
 }
 
+// mostrar mini-carrito al hover (desktop) y al touch (mobile)
+if (carritoIconoElem && miniCarritoElem) {
+  carritoIconoElem.addEventListener('mouseenter', () => {
+    miniCarritoElem.style.display = 'block';
+  });
+  carritoIconoElem.addEventListener('mouseleave', () => {
+    miniCarritoElem.style.display = 'none';
+  });
+
+  // toggle on click for mobile
+  carritoIconoElem.addEventListener('click', (e) => {
+    e.preventDefault();
+    const carritoPanel = document.getElementById('carrito');
+    // show carrito panel for checkout
+    carritoPanel.classList.toggle('mostrar');
+  });
+}
+
 // --- RESUMEN / CONFIRMAR COMPRA (manteniendo original) ---
 document.getElementById('confirmar')?.addEventListener('click', () => {
   if (carrito.length === 0) {
