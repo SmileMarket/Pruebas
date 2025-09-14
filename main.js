@@ -176,6 +176,9 @@ function crearCardProducto(producto) {
         : '<div class="info-overlay">+ info</div>'}
     </div>` : '';
 
+  // urgencia / stock pequeño
+  const urgenciaHTML = (producto.stock > 0 && producto.stock <= 3) ? `<div class="stock-urgente">Quedan solo ${producto.stock} en stock</div>` : '';
+
   div.innerHTML = `
     ${imagenHTML}
     <h3>${escapeHtml(producto.nombre)}</h3>
@@ -590,24 +593,6 @@ function actualizarMiniCarrito() {
   });
   miniTotal.textContent = `Total: $${total.toLocaleString()}`;
   document.getElementById('contador-carrito').textContent = carrito.reduce((s, i) => s + i.cantidad, 0);
-}
-
-// mostrar mini-carrito al hover (desktop) y al touch (mobile)
-if (carritoIconoElem && miniCarritoElem) {
-  carritoIconoElem.addEventListener('mouseenter', () => {
-    miniCarritoElem.style.display = 'block';
-  });
-  carritoIconoElem.addEventListener('mouseleave', () => {
-    miniCarritoElem.style.display = 'none';
-  });
-
-  // toggle on click for mobile
-  carritoIconoElem.addEventListener('click', (e) => {
-    e.preventDefault();
-    const carritoPanel = document.getElementById('carrito');
-    // show carrito panel for checkout
-    carritoPanel.classList.toggle('mostrar');
-  });
 }
 
 // --- RESUMEN / CONFIRMAR COMPRA (manteniendo original) ---
