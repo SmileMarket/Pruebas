@@ -571,6 +571,48 @@ function persistirStock() {
   guardarStockEnLocalStorage(stockObj);
 }
 
+// --- MINI-CARRITO: mostrar resumen rápido al pasar mouse o tocar ícono ---
+const carritoIconoElem = document.getElementById('carrito-icono');
+const miniCarritoElem = document.getElementById('mini-carrito');
+
+function actualizarMiniCarrito() {
+  const miniItems = document.getElementById('mini-items');
+  const miniTotal = document.getElementById('mini-total');
+  if (!miniItems || !miniTotal) return;
+
+  miniItems.innerHTML = '';
+  let total = 0;
+  carrito.forEach(item => {
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.justifyContent = 'space-between';
+    row.style.marginBottom = '6px';
+    row.innerHTML = `<div>${escapeHtml(item.nombre)} x ${item.cantidad}</div><div>$${(item.precio * item.cantidad).toLocaleString()}</div>`;
+    miniItems.appendChild(row);
+    total += item.precio * item.cantidad;
+  });
+  miniTotal.textContent = `Total: $${total.toLocaleString()}`;
+  document.getElementById('contador-carrito').textContent = carrito.reduce((s, i) => s + i.cantidad, 0);
+}
+
+// mostrar mini-carrito al hover (desktop) y al touch (mobile)
+if (carritoIconoElem && miniCarritoElem) {
+  carritoIconoElem.addEventListener('mouseenter', () => {
+    miniCarritoElem.style.display = 'block';
+  });
+  carritoIconoElem.addEventListener('mouseleave', () => {
+    miniCarritoElem.style.display = 'none';
+  });
+
+  // toggle on click for mobile
+  carritoIconoElem.addEventListener('click', (e) => {
+    e.preventDefault();
+    const carritoPanel = document.getElementById('carrito');
+    // show carrito panel for checkout
+    carritoPanel.classList.toggle('mostrar');
+  });
+}
+
 // --- RESUMEN / CONFIRMAR COMPRA (manteniendo original) ---
 document.getElementById('confirmar')?.addEventListener('click', () => {
   if (carrito.length === 0) {
