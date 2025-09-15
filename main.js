@@ -686,8 +686,7 @@ document.getElementById('aplicar-cupon')?.addEventListener('click', () => {
   calcularResumen();
 });
 
-// enviar pedido por WhatsApp (manteniendo la estructura solicitada)
-document.getElementById('enviar-whatsapp')?.addEventListener('click', () => {
+document.getElementById('enviar-whatsapp')?.addEventListener('click', async () => {
   const nombreCliente = document.getElementById('nombre-cliente')?.value.trim();
   if (!nombreCliente) {
     alert("Por favor, ingresá tu nombre antes de enviar el pedido.");
@@ -697,10 +696,39 @@ document.getElementById('enviar-whatsapp')?.addEventListener('click', () => {
   let mensaje = document.getElementById('enviar-whatsapp').dataset.mensaje || '';
   mensaje = `Hola! mi nombre es ${nombreCliente}, quiero realizar una compra:\n\n` + mensaje;
 
+  // Datos para Google Sheets
+  const hoy = new Date();
+  const opciones = { year: 'numeric', month: 'long', day: '2-digit' };
+  const fechaStr = hoy.toLocaleDateString('es-AR', opciones);
+  const mesStr = hoy.toLocaleString('es-AR', { month: 'long', year: 'numeric' });
+
+  const pedidoData = {
+    mes: mesStr.charAt(0).toUpperCase() + mesStr.slice(1), // Ej: Septiembre 2025
+    comprador: nombreCliente,
+    fecha: fechaStr,
+    items: carrito.map(i => ({
+      nombre: i.nombre,
+      cantidad: i.cantidad,
+      precio: i.precio
+    }))
+  };
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbx1FauSLBp5k766M-x-aGNmnz1gYGfIEpepHO9FVOoBmVZMD7BPGHy_2VYdGRsbSz0/exec", {
+      method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pedidoData)
+  });
+} catch (e) {
+  console.error("Error enviando a Google Sheets", e);
+}
+
+  // abrir WhatsApp
   const url = `https://wa.me/5491130335334?text=${encodeURIComponent(mensaje)}`;
   window.open(url, '_blank');
   document.getElementById('resumen-modal').style.display = 'none';
 });
+
 
 // --- INIT: carga inicial y renderizado, y restaurar carrito desde localStorage ---
 document.addEventListener('DOMContentLoaded', async () => {
