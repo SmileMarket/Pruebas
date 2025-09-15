@@ -177,7 +177,7 @@ function crearCardProducto(producto) {
     </div>` : '';
 
   // urgencia / stock pequeño
-  const urgenciaHTML = (producto.stock > 0 && producto.stock <= 3) ? `<div class="stock-urgente">Quedan solo ${producto.stock} en stock</div>` : '';
+  const urgenciaHTML = (producto.stock > 0 && producto.stock <= 3) ? `<div class="stock-urgente"></div>` : '';
 
   div.innerHTML = `
     ${imagenHTML}
@@ -383,7 +383,7 @@ function agregarAlCarrito(boton) {
 
   // verificar cantidad solicitada <= stock
   if (cantidad > prodObj.stock) {
-    alert(`Solo quedan ${prodObj.stock} unidades en stock.`);
+    alert(``);
     return;
   }
 
@@ -523,7 +523,7 @@ function actualizarStockEnDOM(nombreProducto, nuevoStock) {
         if (!urg) {
           urg = document.createElement('div');
           urg.className = 'stock-urgente';
-          urg.textContent = `Quedan solo ${nuevoStock} en stock`;
+          urg.textContent = ``;
           boton.insertAdjacentElement('beforebegin', urg);
         } else {
           urg.textContent = ``;
