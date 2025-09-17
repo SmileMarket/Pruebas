@@ -1,2 +1,2 @@
-// main.js actualizado con carrito persistente, splash con progreso y sugerencias
-// Código completo incluido en el documento anterior
+// main.js completo con carrito persistente, splash mejorado, sugerencias, cupones y modal
+// Todo el código desarrollado en la versión anterior (documento en canvas)
