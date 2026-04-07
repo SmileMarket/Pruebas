@@ -7,8 +7,44 @@ let cuponAplicado = null;
 let totalGlobal = 0;
 let descuentoGlobal = 0;
 
-// 🔥 URL de tu API (YA CONFIGURADA)
-const API_URL = "https://script.google.com/macros/s/AKfycbx1Ab0DMSukT94mE8aI8t9Eb5A7jnb5F97beWbFdzxPa9tnYyYH_PuN-49JklJO25Q/exec";
+// ✅ Parser CSV robusto (soporta comas, comillas y saltos)
+function parseCSV(texto) {
+  const filas = [];
+  let fila = [];
+  let valor = '';
+  let enComillas = false;
+
+  for (let i = 0; i < texto.length; i++) {
+    const char = texto[i];
+    const next = texto[i + 1];
+
+    if (char === '"' && enComillas && next === '"') {
+      valor += '"';
+      i++;
+    } else if (char === '"') {
+      enComillas = !enComillas;
+    } else if (char === ',' && !enComillas) {
+      fila.push(valor.trim());
+      valor = '';
+    } else if ((char === '\n' || char === '\r') && !enComillas) {
+      if (valor || fila.length) {
+        fila.push(valor.trim());
+        filas.push(fila);
+        fila = [];
+        valor = '';
+      }
+    } else {
+      valor += char;
+    }
+  }
+
+  if (valor || fila.length) {
+    fila.push(valor.trim());
+    filas.push(fila);
+  }
+
+  return filas;
+}
 
 // --- Persistencia ---
 function guardarCarritoEnLocalStorage() {
@@ -20,16 +56,12 @@ function guardarCarritoEnLocalStorage() {
 function cargarCarritoDesdeLocalStorage() {
   try {
     const raw = localStorage.getItem('smilemarket_carrito_v1');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) parsed.forEach(item => carrito.push(item));
-    }
+    if (raw) JSON.parse(raw).forEach(item => carrito.push(item));
   } catch (e) {}
 }
 
 // --- Splash ---
 let barraProgresoInterval = null;
-
 function iniciarSplash() {
   const splash = document.getElementById('splash');
   const barra = document.getElementById('barra-progreso');
@@ -38,12 +70,10 @@ function iniciarSplash() {
   splash.style.display = 'flex';
   let valor = 5;
 
-  barra.style.width = valor + '%';
-
   barraProgresoInterval = setInterval(() => {
     if (valor < 92) {
-      valor += Math.random() * 6;
-      barra.style.width = Math.min(92, Math.round(valor)) + '%';
+      valor += Math.random() * 5;
+      barra.style.width = valor + '%';
     }
   }, 300);
 }
@@ -51,7 +81,6 @@ function iniciarSplash() {
 function finalizarSplash() {
   const splash = document.getElementById('splash');
   const barra = document.getElementById('barra-progreso');
-
   if (!splash || !barra) return;
 
   clearInterval(barraProgresoInterval);
@@ -59,112 +88,76 @@ function finalizarSplash() {
 
   setTimeout(() => {
     splash.style.display = 'none';
-    barra.style.width = '0%';
-  }, 300);
+  }, 400);
 }
 
-// 🔥 CARGA DESDE JSON
-async function cargarDatosDesdeAPI() {
-  try {
-    const res = await fetch(API_URL);
-    const data = await res.json();
+// ✅ PRODUCTOS CSV
+async function cargarProductosDesdeGoogleSheet() {
+  const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=1670706691&single=true&output=csv';
 
-    productos = data.productos.map(p => ({
-      nombre: p.nombre || 'Sin nombre',
-      categoria: p.categoria || 'Sin categoría',
-      precio: parseFloat(p.precio) || 0,
-      descripcion: p.descripcion || '',
-      imagen: p.imagen || '',
-      stock: parseInt(p.stock) || 0,
-      nuevo: String(p.nuevo).toUpperCase() === 'TRUE',
-      masvendido: String(p.masvendido).toUpperCase() === 'TRUE',
-      recomendado: String(p.recomendado).toUpperCase() === 'TRUE'
-    }));
+  const res = await fetch(urlCSV);
+  const texto = await res.text();
 
-    cupones = data.cupones.map(c => ({
-      codigo: String(c.codigo).toUpperCase(),
-      descuento: parseFloat(c.descuento) || 0
-    }));
+  const data = parseCSV(texto);
+  const headers = data[0].map(h => h.toLowerCase());
 
-  } catch (e) {
-    console.error("ERROR cargando JSON:", e);
-    alert("Error cargando productos. Revisá la API.");
-  }
-}
+  productos = data.slice(1).map(row => {
+    const obj = Object.fromEntries(headers.map((h, i) => [h, row[i]]));
 
-// --- CARRITO ---
-function agregarAlCarrito(boton) {
-  const producto = boton.closest('.producto');
-  const nombre = producto.dataset.nombre;
-  const precio = parseFloat(producto.dataset.precio);
-  const cantidad = parseInt(producto.querySelector('.cantidad-input').value);
-
-  const existente = carrito.find(i => i.nombre === nombre);
-
-  if (existente) existente.cantidad += cantidad;
-  else carrito.push({ nombre, precio, cantidad });
-
-  guardarCarritoEnLocalStorage();
-  actualizarCarrito();
-}
-
-function eliminarDelCarrito(index) {
-  carrito.splice(index, 1);
-  guardarCarritoEnLocalStorage();
-  actualizarCarrito();
-}
-
-function actualizarCarrito() {
-  const cont = document.getElementById('carrito-items');
-  if (!cont) return;
-
-  cont.innerHTML = '';
-
-  let total = 0;
-  let cantidad = 0;
-
-  carrito.forEach((item, i) => {
-    const div = document.createElement('div');
-
-    div.innerHTML = `
-      <div>${item.nombre} x${item.cantidad}</div>
-      <div>$${(item.precio * item.cantidad).toLocaleString()}</div>
-      <button onclick="eliminarDelCarrito(${i})">X</button>
-    `;
-
-    cont.appendChild(div);
-
-    total += item.precio * item.cantidad;
-    cantidad += item.cantidad;
+    return {
+      nombre: obj.nombre || '',
+      categoria: obj.categoria || '',
+      precio: parseFloat(obj.precio) || 0,
+      descripcion: obj.descripcion || '',
+      imagen: obj.imagen || '',
+      stock: parseInt(obj.stock) || 0,
+      nuevo: obj.nuevo === 'TRUE',
+      masvendido: obj.masvendido === 'TRUE',
+      recomendado: obj.recomendado === 'TRUE'
+    };
   });
-
-  totalGlobal = total;
-
-  document.getElementById('total').textContent = '$' + total.toLocaleString();
-  document.getElementById('contador-carrito').textContent = cantidad;
 }
 
-// --- UI ---
-function cambiarCantidad(boton, delta) {
-  const input = boton.parentElement.querySelector('input');
-  let val = parseInt(input.value) || 1;
-  val += delta;
-  if (val < 1) val = 1;
-  input.value = val;
+// ✅ CUPONES CSV
+async function cargarCuponesDesdeGoogleSheet() {
+  const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=713979488&single=true&output=csv';
+
+  const res = await fetch(urlCSV);
+  const texto = await res.text();
+
+  const data = parseCSV(texto);
+  const headers = data[0].map(h => h.toLowerCase());
+
+  cupones = data.slice(1).map(row => {
+    const obj = Object.fromEntries(headers.map((h, i) => [h, row[i]]));
+
+    return {
+      codigo: obj.codigo?.toUpperCase() || '',
+      descuento: parseFloat(obj.descuento) || 0
+    };
+  });
 }
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
-
   iniciarSplash();
   cargarCarritoDesdeLocalStorage();
 
-  await cargarDatosDesdeAPI(); // 🔥 CAMBIO CLAVE
-
-  renderProductos();
+  try {
+    await cargarProductosDesdeGoogleSheet();
+    await cargarCuponesDesdeGoogleSheet();
+  } catch (e) {
+    alert("Error cargando productos");
+    console.error(e);
+  }
 
   finalizarSplash();
-  actualizarCarrito();
+
+  // 👉 DEBUG CLAVE
+  console.log("PRODUCTOS:", productos);
+  console.log("CUPONES:", cupones);
+
+  renderProductos();
 });
 
 // --- RENDER ---
@@ -172,49 +165,32 @@ function renderProductos() {
   const contenedor = document.getElementById('productos');
   contenedor.innerHTML = '';
 
-  const porCategoria = {};
+  productos.forEach(producto => {
+    const div = document.createElement('div');
+    div.className = 'producto';
 
-  productos.forEach(p => {
-    if (!porCategoria[p.categoria]) porCategoria[p.categoria] = [];
-    porCategoria[p.categoria].push(p);
-  });
+    div.innerHTML = `
+      <h3>${producto.nombre}</h3>
+      <p>$${producto.precio}</p>
+      <button onclick="agregarAlCarritoManual('${producto.nombre}', ${producto.precio})">
+        Agregar
+      </button>
+    `;
 
-  Object.keys(porCategoria).forEach(cat => {
-
-    const grupo = document.createElement('div');
-
-    grupo.innerHTML = `<h2>${cat}</h2>`;
-
-    porCategoria[cat].forEach(p => {
-
-      const div = document.createElement('div');
-      div.className = 'producto';
-
-      div.dataset.nombre = p.nombre;
-      div.dataset.precio = p.precio;
-
-      div.innerHTML = `
-        <img src="${p.imagen}" style="width:100%;height:120px;object-fit:contain;">
-        <h3>${p.nombre}</h3>
-        <p>$${p.precio.toLocaleString()}</p>
-
-        <div>
-          <button onclick="cambiarCantidad(this,-1)">-</button>
-          <input value="1" readonly>
-          <button onclick="cambiarCantidad(this,1)">+</button>
-        </div>
-
-        <button onclick="agregarAlCarrito(this)">Agregar</button>
-      `;
-
-      grupo.appendChild(div);
-    });
-
-    contenedor.appendChild(grupo);
+    contenedor.appendChild(div);
   });
 }
 
-// --- GLOBAL ---
-window.agregarAlCarrito = agregarAlCarrito;
-window.eliminarDelCarrito = eliminarDelCarrito;
-window.cambiarCantidad = cambiarCantidad;
+// --- CARRITO SIMPLE ---
+function agregarAlCarritoManual(nombre, precio) {
+  const existente = carrito.find(p => p.nombre === nombre);
+
+  if (existente) {
+    existente.cantidad++;
+  } else {
+    carrito.push({ nombre, precio, cantidad: 1 });
+  }
+
+  guardarCarritoEnLocalStorage();
+  console.log("Carrito:", carrito);
+}
