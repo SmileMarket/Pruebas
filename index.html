@@ -71,7 +71,7 @@
     .info-overlay { position: absolute; bottom: 8px; right: 8px; background: #f7b0f7; color: white; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
     .sin-stock-overlay { background: rgba(255, 0, 0, 0.85); color: white; padding: 4px 10px; border-radius: 6px; position: absolute; top: 10px; left: 10px; font-size: 0.8rem; font-weight: bold; z-index: 3; }
 
-    #popup { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #f7b0f7; color: white; padding: 1rem 2rem; border-radius: 6px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); display: none; z-index: 1000; font-weight: bold; font-size: 1rem; }
+    #popup { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #f7b0f7; color: white; padding: 1rem 2rem; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); display: none; z-index: 1000; font-weight: bold; font-size: 1rem; }
 
     #carrito { position: fixed; top: 80px; right: 20px; width: 320px; max-height: 80vh; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); padding: 1rem; font-family: 'Comic Neue', cursive; font-size: 0.95rem; z-index: 2000; overflow-y: auto; display: none; }
     #carrito.mostrar { display: block; }
@@ -110,6 +110,187 @@
     #splash { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; background: white; z-index: 99999; flex-direction: column; gap:12px; }
     #barra-progreso-container{ width:80%; max-width:360px; background:#eee; height:10px; border-radius:999px; overflow:hidden }
     #barra-progreso{ height:100%; width:0%; background:#007bff; transition: width 200ms linear }
+
+    /* ✅ popup oculto al inicio */
+    #promo-popup { display:none; }
+
+/* ============================= */
+/* MODAL CHECKOUT PRO */
+/* ============================= */
+
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:10000;
+}
+
+.modal-checkout{
+  background:white;
+  width:95%;
+  max-width:420px;
+  max-height:90vh;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* HEADER */
+
+.modal-header{
+  padding:16px;
+  border-bottom:1px solid #eee;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.modal-header h2{
+  margin:0;
+  font-size:1.2rem;
+}
+
+.modal-cerrar{
+  border:none;
+  background:none;
+  font-size:1.4rem;
+  cursor:pointer;
+}
+
+/* BODY */
+
+.modal-body{
+  padding:16px;
+  overflow-y:auto;
+  flex:1;
+}
+
+/* LISTA PRODUCTOS */
+
+.checkout-items{
+  max-height:220px;
+  overflow-y:auto;
+  border-bottom:1px solid #eee;
+  margin-bottom:15px;
+  padding-bottom:10px;
+}
+
+.checkout-items div{
+  font-size:0.9rem;
+  margin-bottom:4px;
+}
+
+/* FORM */
+
+.checkout-form label{
+  font-weight:bold;
+  font-size:0.85rem;
+  margin-top:10px;
+  display:block;
+}
+
+.checkout-form input{
+  width:100%;
+  padding:8px;
+  border:1px solid #ccc;
+  border-radius:6px;
+  margin-top:4px;
+  margin-bottom:10px;
+}
+
+.cupon-feedback{
+  font-size:0.85rem;
+  margin-top:4px;
+}
+
+/* FOOTER */
+
+.modal-footer{
+  padding:14px;
+  border-top:1px solid #eee;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  background:#fafafa;
+}
+
+/* BOTONES */
+
+.boton{
+  border:none;
+  padding:10px;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.boton-secundario{
+  background:#007b7f;
+  color:white;
+}
+
+.boton-whatsapp{
+  background:#25d366;
+  color:white;
+}
+
+.boton-gris{
+  background:#ddd;
+  color:#333;
+}
+/* TOTAL GRANDE CHECKOUT */
+
+.checkout-total{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:1.2rem;
+  font-weight:bold;
+  margin-bottom:10px;
+  padding-bottom:8px;
+  border-bottom:1px solid #eee;
+}
+
+.checkout-total strong{
+  color:#007b7f;
+  font-size:1.4rem;
+}
+
+/* MOBILE */
+
+@media (max-width:600px){
+
+  .modal-checkout{
+    width:100%;
+    height:95vh;
+    max-height:none;
+    border-radius:14px 14px 0 0;
+  }
+/* ANIMACION MODAL */
+
+.modal-checkout{
+  animation: modalSlide 0.35s ease;
+}
+
+@keyframes modalSlide{
+
+  from{
+    transform:translateY(40px);
+    opacity:0;
+  }
+
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
+
+}
+}
+
   </style>
 </head>
 <body>
@@ -121,6 +302,10 @@
 
   <header id="main-header">
     <img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg" alt="Logo SmileMarket" />
+    
+    <!-- ✅ Saludo personalizado -->
+    <div id="saludo-usuario" style="margin-top:6px; font-weight:bold; color:#007b7f;"></div>
+
     <div id="buscador-container">
       <input type="text" id="buscador" placeholder="Buscar productos..." autocomplete="off" />
       <div id="sugerencias" aria-hidden="true"></div>
@@ -142,27 +327,57 @@
 
   <div id="popup">Producto agregado al carrito</div>
 
-  <div id="resumen-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
-    <div style="background:white; padding:20px; border-radius:8px; width:90%; max-width:400px;">
+  <div id="resumen-modal" class="modal-overlay">
+
+  <div class="modal-checkout">
+
+    <div class="modal-header">
       <h2>Resumen de tu pedido</h2>
-      <div id="resumen-contenido" style="margin-bottom:1rem;"></div>
-
-      <div style="margin-bottom: 1rem;">
-        <label for="nombre-cliente" style="font-weight: bold;">Tu nombre:</label><br>
-        <input type="text" id="nombre-cliente" placeholder="Ingresá tu nombre" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;" />
-      </div>
-
-      <div style="margin-bottom: 1rem;">
-        <label for="cupon" style="font-weight: bold;">Código de descuento:</label><br>
-        <input type="text" id="cupon" placeholder="Ingresá tu cupón" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;" />
-        <button id="aplicar-cupon" class="boton" style="margin-top: 0.5rem; background: #007b7f;">Agregar código</button>
-        <div id="cupon-feedback" style="color: red; font-size: 0.9rem; margin-top: 4px;"></div>
-      </div>
-
-      <button id="enviar-whatsapp" class="boton" style="margin-bottom:10px; background:#28a745;">Enviar por WhatsApp</button>
-      <button id="seguir-comprando" class="boton" style="background:#ccc;color:#333;">Seguir comprando</button>
+      <button onclick="document.getElementById('resumen-modal').style.display='none'" class="modal-cerrar">✕</button>
     </div>
+
+    <div class="modal-body">
+
+     <div id="numero-pedido" style="font-weight:bold; margin-bottom:10px; color:#007b7f;"></div>
+<div id="resumen-contenido" style="margin-bottom:1rem;"></div>
+
+      <div class="checkout-form">
+
+        <label>Tu nombre</label>
+        <input type="text" id="nombre-cliente" placeholder="Ingresá tu nombre">
+
+        <label>Código de descuento</label>
+        <input type="text" id="cupon" placeholder="Ingresá tu cupón">
+
+        <button id="aplicar-cupon" class="boton boton-secundario">
+          Aplicar código
+        </button>
+
+        <div id="cupon-feedback" class="cupon-feedback"></div>
+
+      </div>
+
+    </div>
+<div class="modal-footer">
+
+  <div class="checkout-total">
+    <span>Total</span>
+    <strong id="checkout-total">$0</strong>
   </div>
+
+  <button id="seguir-comprando" class="boton boton-gris">
+    Seguir comprando
+  </button>
+
+  <button id="enviar-whatsapp" class="boton boton-whatsapp">
+    Enviar pedido por WhatsApp
+  </button>
+
+</div>
+
+  </div>
+
+</div>
 
   <div id="info-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
     <div style="background:white; padding:20px; border-radius:6px; max-width:400px; width:90%; position:relative;">
@@ -189,7 +404,23 @@
 
   <div id="ir-arriba" title="Volver arriba">⬆</div>
 
-  <script src="main.js"></script>
+  <!-- ✅ Popup Promocional -->
+  <div id="promo-popup" 
+    style="position:fixed; top:0; left:0; width:100%; height:100%; 
+    background-color:rgba(0,0,0,0.7); z-index:10000; justify-content:center; align-items:center;">
+
+    <div style="position:relative; max-width:400px; width:90%; background:white; border-radius:12px; overflow:hidden;">
+      <button onclick="cerrarPromoPopup()" 
+        style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.8rem; cursor:pointer; z-index:10;">
+        &times;
+      </button>
+      <img id="promo-imagen" src="img/Promo.jpg" 
+        alt="Promoción SmileMarket" style="width:100%; display:block;" />
+    </div>
+  </div>
+
+<script src="main.js"></script>
+
   <script>
     const irArriba = document.getElementById('ir-arriba');
     window.addEventListener('scroll', () => {
@@ -205,5 +436,7 @@
       document.getElementById('resumen-modal').style.display = 'none';
     });
   </script>
+
 </body>
 </html>
+
