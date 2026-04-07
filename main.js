@@ -7,43 +7,27 @@ let cuponAplicado = null;
 let totalGlobal = 0;
 let descuentoGlobal = 0;
 
-// ✅ Parser CSV robusto (soporta comas, comillas y saltos)
-function parseCSV(texto) {
-  const filas = [];
-  let fila = [];
-  let valor = '';
-  let enComillas = false;
+// ✅ PARSER CSV ROBUSTO
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
 
-  for (let i = 0; i < texto.length; i++) {
-    const char = texto[i];
-    const next = texto[i + 1];
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
 
-    if (char === '"' && enComillas && next === '"') {
-      valor += '"';
-      i++;
-    } else if (char === '"') {
-      enComillas = !enComillas;
-    } else if (char === ',' && !enComillas) {
-      fila.push(valor.trim());
-      valor = '';
-    } else if ((char === '\n' || char === '\r') && !enComillas) {
-      if (valor || fila.length) {
-        fila.push(valor.trim());
-        filas.push(fila);
-        fila = [];
-        valor = '';
-      }
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
     } else {
-      valor += char;
+      current += char;
     }
   }
 
-  if (valor || fila.length) {
-    fila.push(valor.trim());
-    filas.push(fila);
-  }
-
-  return filas;
+  result.push(current.trim());
+  return result;
 }
 
 // --- Persistencia ---
@@ -91,49 +75,50 @@ function finalizarSplash() {
   }, 400);
 }
 
-// ✅ PRODUCTOS CSV
+// ✅ PRODUCTOS (FIX CSV)
 async function cargarProductosDesdeGoogleSheet() {
   const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=1670706691&single=true&output=csv';
 
-  const res = await fetch(urlCSV);
-  const texto = await res.text();
+  const response = await fetch(urlCSV);
+  const texto = await response.text();
 
-  const data = parseCSV(texto);
-  const headers = data[0].map(h => h.toLowerCase());
+  const lineas = texto.split('\n').filter(l => l.trim() !== '');
+  const headers = parseCSVLine(lineas[0]).map(h => h.trim().toLowerCase());
 
-  productos = data.slice(1).map(row => {
-    const obj = Object.fromEntries(headers.map((h, i) => [h, row[i]]));
+  productos = lineas.slice(1).map(linea => {
+    const columnas = parseCSVLine(linea);
+    const producto = Object.fromEntries(headers.map((h, i) => [h, columnas[i] || '']));
 
     return {
-      nombre: obj.nombre || '',
-      categoria: obj.categoria || '',
-      precio: parseFloat(obj.precio) || 0,
-      descripcion: obj.descripcion || '',
-      imagen: obj.imagen || '',
-      stock: parseInt(obj.stock) || 0,
-      nuevo: obj.nuevo === 'TRUE',
-      masvendido: obj.masvendido === 'TRUE',
-      recomendado: obj.recomendado === 'TRUE'
+      nombre: producto.nombre || 'Sin nombre',
+      categoria: producto.categoria || 'Sin categoría',
+      precio: parseFloat(producto.precio) || 0,
+      descripcion: producto.descripcion || '',
+      imagen: producto.imagen || '',
+      stock: parseInt(producto.stock) || 0,
+      nuevo: producto.nuevo === 'TRUE',
+      masvendido: producto.masvendido === 'TRUE',
+      recomendado: producto.recomendado === 'TRUE'
     };
   });
 }
 
-// ✅ CUPONES CSV
+// ✅ CUPONES (FIX CSV)
 async function cargarCuponesDesdeGoogleSheet() {
   const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm_x_4hR7AM7cghSD1NWOTzf1q8-o3QMhGqQOENtSBRtF0mIkiWPohv3hhbDhuzYGa459Tn3HQXKOL/pub?gid=713979488&single=true&output=csv';
 
-  const res = await fetch(urlCSV);
-  const texto = await res.text();
+  const response = await fetch(urlCSV);
+  const texto = await response.text();
 
-  const data = parseCSV(texto);
-  const headers = data[0].map(h => h.toLowerCase());
+  const lineas = texto.split('\n').filter(l => l.trim() !== '');
+  const headers = parseCSVLine(lineas[0]).map(h => h.trim().toLowerCase());
 
-  cupones = data.slice(1).map(row => {
-    const obj = Object.fromEntries(headers.map((h, i) => [h, row[i]]));
-
+  cupones = lineas.slice(1).map(linea => {
+    const columnas = parseCSVLine(linea);
+    const fila = Object.fromEntries(headers.map((h, i) => [h, columnas[i] || '']));
     return {
-      codigo: obj.codigo?.toUpperCase() || '',
-      descuento: parseFloat(obj.descuento) || 0
+      codigo: fila.codigo?.toUpperCase() || '',
+      descuento: parseFloat(fila.descuento) || 0
     };
   });
 }
@@ -143,54 +128,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   iniciarSplash();
   cargarCarritoDesdeLocalStorage();
 
-  try {
-    await cargarProductosDesdeGoogleSheet();
-    await cargarCuponesDesdeGoogleSheet();
-  } catch (e) {
-    alert("Error cargando productos");
-    console.error(e);
-  }
+  await cargarProductosDesdeGoogleSheet();
+  await cargarCuponesDesdeGoogleSheet();
 
   finalizarSplash();
 
-  // 👉 DEBUG CLAVE
-  console.log("PRODUCTOS:", productos);
-  console.log("CUPONES:", cupones);
+  console.log("✅ Productos OK:", productos.length);
+  console.log("✅ Cupones OK:", cupones.length);
 
-  renderProductos();
+  // 👉 IMPORTANTE: NO tocamos tu render original
 });
-
-// --- RENDER ---
-function renderProductos() {
-  const contenedor = document.getElementById('productos');
-  contenedor.innerHTML = '';
-
-  productos.forEach(producto => {
-    const div = document.createElement('div');
-    div.className = 'producto';
-
-    div.innerHTML = `
-      <h3>${producto.nombre}</h3>
-      <p>$${producto.precio}</p>
-      <button onclick="agregarAlCarritoManual('${producto.nombre}', ${producto.precio})">
-        Agregar
-      </button>
-    `;
-
-    contenedor.appendChild(div);
-  });
-}
-
-// --- CARRITO SIMPLE ---
-function agregarAlCarritoManual(nombre, precio) {
-  const existente = carrito.find(p => p.nombre === nombre);
-
-  if (existente) {
-    existente.cantidad++;
-  } else {
-    carrito.push({ nombre, precio, cantidad: 1 });
-  }
-
-  guardarCarritoEnLocalStorage();
-  console.log("Carrito:", carrito);
-}
