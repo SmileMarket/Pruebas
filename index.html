@@ -1,442 +1,250 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SmileMarket</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" />
-  <style>
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Comic Neue', cursive;
-      margin: 0;
-      padding: 0;
-      background: #f9f9f9;
-      color: #333;
-      overflow-x: hidden;
-    }
-    header {
-      position: sticky;
-      top: 0;
-      background: #f7b0f7;
-      z-index: 1001;
-      padding: 0.5rem 1rem;
-      text-align: center;
-      min-height: 90px;
-    }
-    header img { max-width: 180px; height: auto; }
-    #buscador-container { display: flex; justify-content: center; margin-top: 1rem; position: relative; }
-    #buscador { padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; width: 80%; max-width: 320px; font-size: 1rem; }
-    #sugerencias {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80%;
-      max-width: 360px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-      display: none;
-      z-index: 1500;
-      max-height: 300px;
-      overflow-y: auto;
-      padding: 6px;
-    }
-    .sugerencia-item { display:flex; gap:8px; align-items:center; padding:6px; border-radius:6px; cursor:pointer; }
-    .sugerencia-item:hover{ background:#f1f1f1 }
-    .sugerencia-item img{ width:46px; height:46px; object-fit:contain; background:white; border-radius:6px; padding:4px; box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-    .sugerencia-text{ font-size:0.9rem }
-    .sugerencia-precio{ font-weight:700; font-size:0.9rem; color:#007b7f }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    .container { max-width: 1100px; margin: 2rem auto; padding: 3rem 1rem 1rem; transition: padding-top 0.3s ease; }
-    h2 { border-bottom: 2px solid #f5a2f5; padding-bottom: .3rem; margin: 1.5rem 0 1rem; color: #007b7f; }
+<title>SmileMarket</title>
 
-    .productos { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
-    .producto { background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); padding: 1rem; width: 200px; display: flex; flex-direction: column; align-items: center; }
-    .producto img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 0.5rem; background: white; }
-    .producto h3 { font-size: 1.1rem; margin: 0 0 0.3rem 0; text-align: center; }
-    .categoria-texto { font-size: 0.85rem; color: #555; margin-bottom: 0.3rem; text-align: center; }
-    .precio { color: #f5a2f5; font-weight: 700; margin: 0.5rem 0; }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-    .control-cantidad { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.7rem; }
-    .control-cantidad button { width: 32px; height: 32px; border: none; background: #ddd; font-weight: bold; font-size: 1.2rem; cursor: pointer; border-radius: 6px; }
-    .control-cantidad input { width: 40px; height: 32px; text-align: center; font-size: 1rem; font-weight: bold; border: 1px solid #ccc; border-radius: 6px; }
+<style>
 
-    .boton { background: #f5a2f5; border: none; color: white; padding: 0.5rem; cursor: pointer; font-weight: bold; border-radius: 6px; width: 100%; }
-    .boton:hover { background: #e392e3; }
-
-    .producto-imagen-container { position: relative; width: 100%; }
-    .info-overlay { position: absolute; bottom: 8px; right: 8px; background: #f7b0f7; color: white; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-    .sin-stock-overlay { background: rgba(255, 0, 0, 0.85); color: white; padding: 4px 10px; border-radius: 6px; position: absolute; top: 10px; left: 10px; font-size: 0.8rem; font-weight: bold; z-index: 3; }
-
-    #popup { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #f7b0f7; color: white; padding: 1rem 2rem; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); display: none; z-index: 1000; font-weight: bold; font-size: 1rem; }
-
-    #carrito { position: fixed; top: 80px; right: 20px; width: 320px; max-height: 80vh; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); padding: 1rem; font-family: 'Comic Neue', cursive; font-size: 0.95rem; z-index: 2000; overflow-y: auto; display: none; }
-    #carrito.mostrar { display: block; }
-    #carrito h2 { margin-top: 0; }
-    .carrito-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 0.4rem 0; }
-    .carrito-item button { background: none; border: none; color: #d9534f; font-size: 1.2rem; cursor: pointer; padding: 0; }
-
-    #confirmar { margin-top: 1rem; width: 100%; background: #007bff; color: white; border: none; padding: 0.6rem; font-weight: 700; border-radius: 4px; cursor: pointer; }
-    #cerrar-carrito { position: absolute; top: 6px; right: 10px; font-size: 1.4rem; background: none; border: none; color: #d9534f; cursor: pointer; }
-
-    .float-button { position: fixed; right: 15px; width: 50px; height: 50px; padding: 10px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s ease; z-index: 998; }
-    .carrito-float { top: 50%; background: white; border: 2px solid #007b7f; }
-    .whatsapp-float { top: calc(50% - 60px); background: #25d366; border: 2px solid #25d366; }
-    .instagram-float { top: calc(50% + 60px); background: white; border: 2px solid #E1306C; }
-    .carrito-float svg { width: 24px; height: 24px; }
-    #contador-carrito { position: absolute; top: -4px; right: -4px; background: red; color: white; font-size: 0.75rem; padding: 2px 6px; border-radius: 999px; font-weight: bold; }
-
-    #ir-arriba { position: fixed; bottom: 20px; right: 20px; background: #f7b0f7; color: white; font-size: 1.4rem; padding: 10px 14px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 999; display: none; }
-
-    @keyframes vibrar { 0% { transform: translate(0); } 25% { transform: translate(-2px, 2px); } 50% { transform: translate(2px, -2px); } 75% { transform: translate(-2px, 2px); } 100% { transform: translate(0); } }
-    .vibrar { animation: vibrar 0.3s ease; }
-
-    .etiquetas { display:flex; gap:6px; margin:0.4rem 0 }
-    .etiqueta{ padding:4px 8px; border-radius:999px; font-size:0.75rem; font-weight:700; color:white }
-    .etiqueta.nuevo{ background:#28a745 }
-    .etiqueta.masvendido{ background:#dc3545 }
-    .etiqueta.recomendado{ background:#d4af37; color:#111 }
-
-    @media (max-width: 768px) {
-      header img { max-width: 180px; }
-      .producto { width: 45%; }
-      #carrito { top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-height: 80vh; border-radius: 12px 12px 0 0; transform: translateY(100%); transition: transform 300ms ease; padding-bottom: 30px; }
-      #carrito.mostrar { transform: translateY(0%); display:block }
-    }
-
-    #splash { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; background: white; z-index: 99999; flex-direction: column; gap:12px; }
-    #barra-progreso-container{ width:80%; max-width:360px; background:#eee; height:10px; border-radius:999px; overflow:hidden }
-    #barra-progreso{ height:100%; width:0%; background:#007bff; transition: width 200ms linear }
-
-    /* ✅ popup oculto al inicio */
-    #promo-popup { display:none; }
-
-/* ============================= */
-/* MODAL CHECKOUT PRO */
-/* ============================= */
-
-.modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.65);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:10000;
+:root{
+  --rosa:#f5a2f5;
+  --rosa-fuerte:#e15be1;
+  --verde:#007b7f;
+  --fondo:#f9fafb;
+  --texto:#1f2d3d;
 }
 
-.modal-checkout{
-  background:white;
-  width:95%;
-  max-width:420px;
-  max-height:90vh;
-  border-radius:12px;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:var(--fondo);
+  color:var(--texto);
 }
 
 /* HEADER */
 
-.modal-header{
-  padding:16px;
-  border-bottom:1px solid #eee;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+.topbar{
+  background:var(--rosa);
+  color:white;
+  text-align:center;
+  font-size:0.85rem;
+  padding:6px;
 }
 
-.modal-header h2{
+header{
+  background:white;
+  padding:12px;
+  text-align:center;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+
+header img{
+  max-width:160px;
+}
+
+#buscador{
+  margin-top:10px;
+  padding:10px;
+  width:90%;
+  max-width:320px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+/* HERO */
+
+.hero{
+  margin:20px auto;
+  max-width:1000px;
+  background:linear-gradient(135deg,#f5a2f5,#ffe6ff);
+  padding:30px;
+  border-radius:14px;
+  text-align:center;
+}
+
+.hero h1{
   margin:0;
-  font-size:1.2rem;
 }
 
-.modal-cerrar{
+.hero p{
+  color:#555;
+}
+
+.boton{
+  background:linear-gradient(135deg,var(--rosa-fuerte),var(--verde));
+  color:white;
   border:none;
-  background:none;
-  font-size:1.4rem;
+  padding:10px 16px;
+  border-radius:8px;
+  font-weight:600;
   cursor:pointer;
 }
 
-/* BODY */
+/* BENEFICIOS */
 
-.modal-body{
-  padding:16px;
-  overflow-y:auto;
-  flex:1;
-}
-
-/* LISTA PRODUCTOS */
-
-.checkout-items{
-  max-height:220px;
-  overflow-y:auto;
-  border-bottom:1px solid #eee;
-  margin-bottom:15px;
-  padding-bottom:10px;
-}
-
-.checkout-items div{
-  font-size:0.9rem;
-  margin-bottom:4px;
-}
-
-/* FORM */
-
-.checkout-form label{
-  font-weight:bold;
-  font-size:0.85rem;
-  margin-top:10px;
-  display:block;
-}
-
-.checkout-form input{
-  width:100%;
-  padding:8px;
-  border:1px solid #ccc;
-  border-radius:6px;
-  margin-top:4px;
-  margin-bottom:10px;
-}
-
-.cupon-feedback{
-  font-size:0.85rem;
-  margin-top:4px;
-}
-
-/* FOOTER */
-
-.modal-footer{
-  padding:14px;
-  border-top:1px solid #eee;
+.beneficios{
   display:flex;
-  flex-direction:column;
-  gap:8px;
-  background:#fafafa;
+  gap:15px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin:20px;
+  font-size:0.9rem;
 }
+
+/* PRODUCTOS */
+
+.container{
+  max-width:1100px;
+  margin:auto;
+}
+
+.productos{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+  justify-content:center;
+}
+
+.producto{
+  background:white;
+  border-radius:14px;
+  padding:12px;
+  width:220px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+  transition:0.25s;
+}
+
+.producto:hover{
+  transform:translateY(-5px);
+}
+
+.producto img{
+  width:100%;
+  height:150px;
+  object-fit:contain;
+}
+
+.producto h3{
+  font-size:0.95rem;
+  min-height:40px;
+}
+
+.precio{
+  color:var(--rosa-fuerte);
+  font-weight:bold;
+  font-size:1.2rem;
+}
+
+.etiqueta{
+  display:inline-block;
+  font-size:0.7rem;
+  padding:4px 8px;
+  border-radius:999px;
+  color:white;
+  margin:2px;
+}
+
+.estudiante{background:var(--rosa)}
+.kit{background:var(--verde)}
+.top{background:#ffc107;color:black}
 
 /* BOTONES */
 
-.boton{
-  border:none;
-  padding:10px;
-  border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.boton-secundario{
-  background:#007b7f;
-  color:white;
-}
-
-.boton-whatsapp{
-  background:#25d366;
-  color:white;
-}
-
-.boton-gris{
-  background:#ddd;
-  color:#333;
-}
-/* TOTAL GRANDE CHECKOUT */
-
-.checkout-total{
+.control-cantidad{
   display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:1.2rem;
-  font-weight:bold;
-  margin-bottom:10px;
-  padding-bottom:8px;
-  border-bottom:1px solid #eee;
+  justify-content:center;
+  gap:6px;
+  margin:6px 0;
 }
 
-.checkout-total strong{
-  color:#007b7f;
-  font-size:1.4rem;
+.control-cantidad input{
+  width:40px;
+  text-align:center;
 }
 
-/* MOBILE */
-
-@media (max-width:600px){
-
-  .modal-checkout{
-    width:100%;
-    height:95vh;
-    max-height:none;
-    border-radius:14px 14px 0 0;
-  }
-/* ANIMACION MODAL */
-
-.modal-checkout{
-  animation: modalSlide 0.35s ease;
+#popup{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--verde);
+  color:white;
+  padding:10px 20px;
+  border-radius:8px;
+  display:none;
 }
 
-@keyframes modalSlide{
+/* CARRITO */
 
-  from{
-    transform:translateY(40px);
-    opacity:0;
-  }
-
-  to{
-    transform:translateY(0);
-    opacity:1;
-  }
-
+#carrito{
+  position:fixed;
+  right:20px;
+  top:100px;
+  background:white;
+  width:300px;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.15);
+  display:none;
 }
+
+#carrito.mostrar{
+  display:block;
 }
 
-  </style>
+</style>
 </head>
+
 <body>
 
-  <div id="splash">
-    <div><strong>Cargando…</strong></div>
-    <div id="barra-progreso-container"><div id="barra-progreso"></div></div>
-  </div>
-
-  <header id="main-header">
-    <img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg" alt="Logo SmileMarket" />
-    
-    <!-- ✅ Saludo personalizado -->
-    <div id="saludo-usuario" style="margin-top:6px; font-weight:bold; color:#007b7f;"></div>
-
-    <div id="buscador-container">
-      <input type="text" id="buscador" placeholder="Buscar productos..." autocomplete="off" />
-      <div id="sugerencias" aria-hidden="true"></div>
-    </div>
-  </header>
-
-  <div class="container">
-    <h2>Productos</h2>
-    <div id="productos" class="productos"></div>
-  </div>
-
-  <div id="carrito">
-    <button id="cerrar-carrito">&times;</button>
-    <h2>Carrito</h2>
-    <div id="carrito-items"></div>
-    <div id="total">Total: $0</div>
-    <button id="confirmar">Confirmar compra</button>
-  </div>
-
-  <div id="popup">Producto agregado al carrito</div>
-
-  <div id="resumen-modal" class="modal-overlay">
-
-  <div class="modal-checkout">
-
-    <div class="modal-header">
-      <h2>Resumen de tu pedido</h2>
-      <button onclick="document.getElementById('resumen-modal').style.display='none'" class="modal-cerrar">✕</button>
-    </div>
-
-    <div class="modal-body">
-
-     <div id="numero-pedido" style="font-weight:bold; margin-bottom:10px; color:#007b7f;"></div>
-<div id="resumen-contenido" style="margin-bottom:1rem;"></div>
-
-      <div class="checkout-form">
-
-        <label>Tu nombre</label>
-        <input type="text" id="nombre-cliente" placeholder="Ingresá tu nombre">
-
-        <label>Código de descuento</label>
-        <input type="text" id="cupon" placeholder="Ingresá tu cupón">
-
-        <button id="aplicar-cupon" class="boton boton-secundario">
-          Aplicar código
-        </button>
-
-        <div id="cupon-feedback" class="cupon-feedback"></div>
-
-      </div>
-
-    </div>
-<div class="modal-footer">
-
-  <div class="checkout-total">
-    <span>Total</span>
-    <strong id="checkout-total">$0</strong>
-  </div>
-
-  <button id="seguir-comprando" class="boton boton-gris">
-    Seguir comprando
-  </button>
-
-  <button id="enviar-whatsapp" class="boton boton-whatsapp">
-    Enviar pedido por WhatsApp
-  </button>
-
+<div class="topbar">
+🎓 Insumos odontológicos pensados para estudiantes
 </div>
 
-  </div>
+<header>
+<img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg">
 
+<br>
+
+<input type="text" id="buscador" placeholder="Buscar productos...">
+</header>
+
+<div class="hero">
+<h1>Todo lo que necesitás para cursar odontología</h1>
+<p>Kits, materiales y accesorios para cada etapa de la carrera</p>
+<button class="boton">Ver productos</button>
 </div>
 
-  <div id="info-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:10000; justify-content:center; align-items:center;">
-    <div style="background:white; padding:20px; border-radius:6px; max-width:400px; width:90%; position:relative;">
-      <button onclick="cerrarModalInfo()" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
-      <h3 id="modal-titulo"></h3>
-      <p id="modal-descripcion" style="margin-top: 1rem;"></p>
-    </div>
-  </div>
+<div class="beneficios">
+<div>🎓 Pensado para estudiantes</div>
+<div>💰 Precios accesibles</div>
+<div>📦 Armá tu kit completo</div>
+<div>💬 Atención por WhatsApp</div>
+</div>
 
-  <a href="https://wa.me/5491130335334?text=¡Hola!%20Tengo%20una%20consulta" class="float-button whatsapp-float" target="_blank">💬</a>
+<div class="container">
+<div class="productos" id="productos"></div>
+</div>
 
-  <a href="#carrito" class="float-button carrito-float" id="carrito-icono">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart">
-      <circle cx="9" cy="21" r="1"></circle>
-      <circle cx="20" cy="21" r="1"></circle>
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-    </svg>
-    <span id="contador-carrito">0</span>
-  </a>
+<div id="popup">Producto agregado</div>
 
-  <a href="https://www.instagram.com/smilemarket.ar" target="_blank" class="float-button instagram-float">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" width="24" height="24" />
-  </a>
-
-  <div id="ir-arriba" title="Volver arriba">⬆</div>
-
-  <!-- ✅ Popup Promocional -->
-  <div id="promo-popup" 
-    style="position:fixed; top:0; left:0; width:100%; height:100%; 
-    background-color:rgba(0,0,0,0.7); z-index:10000; justify-content:center; align-items:center;">
-
-    <div style="position:relative; max-width:400px; width:90%; background:white; border-radius:12px; overflow:hidden;">
-      <button onclick="cerrarPromoPopup()" 
-        style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.8rem; cursor:pointer; z-index:10;">
-        &times;
-      </button>
-      <img id="promo-imagen" src="img/Promo.jpg" 
-        alt="Promoción SmileMarket" style="width:100%; display:block;" />
-    </div>
-  </div>
+<div id="carrito">
+<h3>Carrito</h3>
+<div id="carrito-items"></div>
+<div id="total"></div>
+<button id="confirmar" class="boton">Finalizar compra</button>
+</div>
 
 <script src="main.js"></script>
 
-  <script>
-    const irArriba = document.getElementById('ir-arriba');
-    window.addEventListener('scroll', () => {
-      irArriba.style.display = window.scrollY > 300 ? 'block' : 'none';
-    }, { passive: true });
-    irArriba?.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    document.getElementById('cerrar-carrito')?.addEventListener('click', () => {
-      document.getElementById('carrito')?.classList.remove('mostrar');
-    });
-    document.getElementById('seguir-comprando')?.addEventListener('click', () => {
-      document.getElementById('resumen-modal').style.display = 'none';
-    });
-  </script>
-
 </body>
 </html>
-
