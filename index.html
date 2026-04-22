@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-
 <title>SmileMarket</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -27,8 +26,7 @@ body{
   color:var(--texto);
 }
 
-/* HEADER */
-
+/* TOP BAR */
 .topbar{
   background:var(--rosa);
   color:white;
@@ -37,6 +35,7 @@ body{
   padding:6px;
 }
 
+/* HEADER */
 header{
   background:white;
   padding:12px;
@@ -61,7 +60,6 @@ header img{
 }
 
 /* HERO */
-
 .hero{
   margin:20px auto;
   max-width:1000px;
@@ -90,7 +88,6 @@ header img{
 }
 
 /* BENEFICIOS */
-
 .beneficios{
   display:flex;
   gap:15px;
@@ -101,7 +98,6 @@ header img{
 }
 
 /* PRODUCTOS */
-
 .container{
   max-width:1100px;
   margin:auto;
@@ -144,21 +140,7 @@ header img{
   font-size:1.2rem;
 }
 
-.etiqueta{
-  display:inline-block;
-  font-size:0.7rem;
-  padding:4px 8px;
-  border-radius:999px;
-  color:white;
-  margin:2px;
-}
-
-.estudiante{background:var(--rosa)}
-.kit{background:var(--verde)}
-.top{background:#ffc107;color:black}
-
-/* BOTONES */
-
+/* CONTROLES */
 .control-cantidad{
   display:flex;
   justify-content:center;
@@ -171,6 +153,7 @@ header img{
   text-align:center;
 }
 
+/* POPUP */
 #popup{
   position:fixed;
   bottom:20px;
@@ -184,7 +167,6 @@ header img{
 }
 
 /* CARRITO */
-
 #carrito{
   position:fixed;
   right:20px;
@@ -212,9 +194,7 @@ header img{
 
 <header>
 <img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg">
-
 <br>
-
 <input type="text" id="buscador" placeholder="Buscar productos...">
 </header>
 
@@ -241,8 +221,24 @@ header img{
 <h3>Carrito</h3>
 <div id="carrito-items"></div>
 <div id="total"></div>
-<button id="confirmar" class="boton">Finalizar compra</button>
 </div>
+
+<!-- BOTONES FLOTANTES -->
+
+<a href="https://wa.me/5491130335334" target="_blank"
+style="position:fixed;right:15px;bottom:100px;background:#25d366;color:white;padding:12px;border-radius:50%;z-index:999;">
+💬
+</a>
+
+<div onclick="toggleCarrito()"
+style="position:fixed;right:15px;bottom:40px;background:white;border:2px solid #007b7f;padding:12px;border-radius:50%;cursor:pointer;z-index:999;">
+🛒
+</div>
+
+<a href="https://www.instagram.com/smilemarket.ar" target="_blank"
+style="position:fixed;right:15px;bottom:160px;background:white;border:2px solid #E1306C;padding:12px;border-radius:50%;z-index:999;">
+📷
+</a>
 
 <script src="main.js"></script>
 

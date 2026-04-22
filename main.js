@@ -1,7 +1,7 @@
 const carrito = [];
 let productos = [];
 
-/* CSV parser igual */
+/* CSV ROBUSTO */
 function parseCSVLine(line) {
   const result = [];
   let current = '';
@@ -33,27 +33,26 @@ const res = await fetch(url);
 const text = await res.text();
 
 const lines = text.split('\n').filter(l => l.trim() !== '');
-const headers = parseCSVLine(lines[0]);
+const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
 
 productos = lines.slice(1).map(l => {
-const cols = parseCSVLine(l);
+  const cols = parseCSVLine(l);
+  const obj = Object.fromEntries(headers.map((h,i)=>[h,cols[i]]));
 
-return {
-nombre: cols[0],
-categoria: cols[1],
-precio: parseFloat(cols[2]),
-descripcion: cols[3],
-imagen: cols[4],
-stock: parseInt(cols[5])
-};
+  return {
+    nombre: obj.nombre || 'Sin nombre',
+    categoria: obj.categoria || '',
+    precio: parseFloat((obj.precio || "0").replace(/[^0-9.,]/g, '').replace(',', '.')) || 0,
+    descripcion: obj.descripcion || '',
+    imagen: (obj.imagen || '').trim(),
+    stock: parseInt(obj.stock) || 0
+  };
 });
 
 renderProductos();
-
 }
 
 /* RENDER */
-
 function renderProductos(){
 
 const cont = document.getElementById('productos');
@@ -65,10 +64,9 @@ const div = document.createElement('div');
 div.className = 'producto';
 
 div.innerHTML = `
-<img src="${p.imagen}">
-<h3>${p.nombre}</h3>
+<img src="${p.imagen}" onerror="this.src='https://via.placeholder.com/150?text=Sin+imagen'">
 
-<div class="etiqueta estudiante">🎓 Estudiantes</div>
+<h3>${p.nombre}</h3>
 
 <div style="font-size:0.8rem;color:#666;">
 ✔ Usado en prácticas
@@ -94,7 +92,6 @@ cont.appendChild(div);
 }
 
 /* CANTIDAD */
-
 function cambiarCantidad(i,val){
 const input = document.getElementById('cant-'+i);
 let num = parseInt(input.value) || 1;
@@ -104,7 +101,6 @@ input.value = num;
 }
 
 /* CARRITO */
-
 function agregarCarrito(i){
 
 const cantidad = parseInt(document.getElementById('cant-'+i).value);
@@ -116,7 +112,6 @@ cantidad
 
 mostrarPopup();
 renderCarrito();
-
 }
 
 function mostrarPopup(){
@@ -143,11 +138,14 @@ ${item.nombre} x${item.cantidad}
 });
 
 document.getElementById('total').innerText = "Total: $" + total;
+}
 
+/* TOGGLE */
+function toggleCarrito(){
+  document.getElementById('carrito').classList.toggle('mostrar');
 }
 
 /* INIT */
-
 document.addEventListener('DOMContentLoaded',()=>{
 cargarProductos();
 });
