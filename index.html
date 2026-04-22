@@ -5,178 +5,197 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SmileMarket</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap">
 
 <style>
-:root{
---rosa:#f5a2f5;
---rosa-fuerte:#e15be1;
---verde:#007b7f;
---fondo:#f9fafb;
-}
-
 body{
-margin:0;
-font-family:'Inter',sans-serif;
-background:var(--fondo);
-}
-
-/* HEADER */
-.topbar{
-background:var(--rosa);
-color:white;
-text-align:center;
-padding:6px;
+  font-family:'Comic Neue', cursive;
+  margin:0;
+  background:#f9f9f9;
 }
 
 header{
-text-align:center;
-background:white;
-padding:15px;
-box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  background:#f7b0f7;
+  padding:10px;
+  text-align:center;
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+
+header img{
+  max-width:160px;
 }
 
 #buscador{
-margin-top:10px;
-padding:10px;
-width:300px;
-border-radius:8px;
-border:1px solid #ddd;
+  margin-top:10px;
+  padding:8px;
+  width:80%;
+  max-width:300px;
 }
 
-/* HERO */
-.hero{
-margin:20px;
-padding:25px;
-background:linear-gradient(135deg,#f5a2f5,#ffe6ff);
-border-radius:12px;
-text-align:center;
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
 }
 
-.boton{
-background:linear-gradient(135deg,#e15be1,#007b7f);
-color:white;
-border:none;
-padding:10px;
-border-radius:8px;
-cursor:pointer;
-}
-
-/* PRODUCTOS */
 .productos{
-display:flex;
-flex-wrap:wrap;
-gap:15px;
-justify-content:center;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
 }
 
 .producto{
-background:white;
-padding:10px;
-border-radius:12px;
-width:220px;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  background:white;
+  width:200px;
+  padding:10px;
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  text-align:center;
 }
 
 .producto img{
-width:100%;
-height:150px;
-object-fit:contain;
+  width:100%;
+  height:150px;
+  object-fit:contain;
 }
 
 .precio{
-color:#e15be1;
-font-weight:bold;
+  color:#e91e63;
+  font-weight:bold;
 }
 
-/* CARRITO */
+.boton{
+  background:#e91e63;
+  color:white;
+  border:none;
+  padding:6px;
+  border-radius:6px;
+  cursor:pointer;
+  width:100%;
+}
+
+.control-cantidad{
+  display:flex;
+  justify-content:center;
+  gap:5px;
+  margin:5px 0;
+}
+
 #carrito{
-position:fixed;
-right:0;
-top:0;
-width:320px;
-height:100%;
-background:white;
-box-shadow:-3px 0 10px rgba(0,0,0,0.2);
-padding:15px;
-transform:translateX(100%);
-transition:0.3s;
-z-index:2000;
-overflow-y:auto;
+  position:fixed;
+  right:10px;
+  top:80px;
+  background:white;
+  width:300px;
+  max-height:70vh;
+  overflow:auto;
+  padding:10px;
+  border-radius:8px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.2);
+  display:none;
 }
 
 #carrito.mostrar{
-transform:translateX(0);
+  display:block;
 }
 
-#contador{
-position:absolute;
-top:-5px;
-right:-5px;
-background:red;
-color:white;
-border-radius:50%;
-padding:2px 6px;
-font-size:12px;
+.carrito-item{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:5px;
 }
 
-/* BOTONES */
-.float{
-position:fixed;
-right:15px;
-border-radius:50%;
-padding:12px;
-cursor:pointer;
-z-index:999;
+#contador-carrito{
+  position:absolute;
+  top:-5px;
+  right:-5px;
+  background:red;
+  color:white;
+  border-radius:50%;
+  padding:2px 6px;
+  font-size:12px;
 }
 
-.whatsapp{bottom:120px;background:#25d366;color:white;}
-.carrito-btn{bottom:60px;background:white;border:2px solid #007b7f;}
-.insta{bottom:180px;background:white;border:2px solid #E1306C;}
+.float-button{
+  position:fixed;
+  right:10px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
 
+.carrito-float{
+  top:50%;
+  background:white;
+}
+
+.whatsapp-float{
+  top:40%;
+  background:#25d366;
+}
+
+.instagram-float{
+  top:60%;
+  background:white;
+}
 </style>
 </head>
 
 <body>
 
-<div class="topbar">🎓 Insumos odontológicos para estudiantes</div>
-
 <header>
-<img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg" width="120">
-<br>
-<input id="buscador" placeholder="Buscar productos...">
+  <img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg">
+
+  <br>
+
+  <input type="text" id="buscador" placeholder="Buscar productos...">
 </header>
 
-<div class="hero">
-<h2>Todo lo que necesitás para cursar odontología</h2>
-<p>Kits y materiales para estudiantes</p>
-<button class="boton">Ver productos</button>
+<div class="container">
+  <div id="productos" class="productos"></div>
 </div>
-
-<div class="productos" id="productos"></div>
 
 <!-- CARRITO -->
 <div id="carrito">
-<h3>Tu carrito</h3>
-<div id="carrito-items"></div>
-<h3 id="total"></h3>
-
-<button class="boton" onclick="enviarWhatsApp()">
-Enviar pedido por WhatsApp
-</button>
+  <h3>Carrito</h3>
+  <div id="carrito-items"></div>
+  <div id="total">Total: $0</div>
+  <button id="confirmar">Enviar pedido</button>
 </div>
 
-<!-- BOTONES -->
-<div class="float whatsapp" onclick="consultaWhatsApp()">💬</div>
+<!-- BOTONES FLOTANTES -->
 
-<div class="float carrito-btn" onclick="toggleCarrito()">
+<a href="#" class="float-button carrito-float" id="carrito-icono">
 🛒
-<span id="contador">0</span>
-</div>
+<span id="contador-carrito">0</span>
+</a>
 
-<a href="https://www.instagram.com/smilemarket.ar" target="_blank" class="float insta">📷</a>
+<a href="https://wa.me/5491130335334?text=Hola!%20Tengo%20una%20consulta:%20"
+class="float-button whatsapp-float" target="_blank">
+💬
+</a>
+
+<a href="https://www.instagram.com/smilemarket.ar"
+class="float-button instagram-float" target="_blank">
+📸
+</a>
 
 <script src="main.js"></script>
+
+<script>
+// ABRIR / CERRAR CARRITO
+document.getElementById("carrito-icono").addEventListener("click", (e)=>{
+  e.preventDefault();
+  document.getElementById("carrito").classList.toggle("mostrar");
+});
+</script>
 
 </body>
 </html>
