@@ -1,244 +1,180 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SmileMarket</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-
 :root{
-  --rosa:#f5a2f5;
-  --rosa-fuerte:#e15be1;
-  --verde:#007b7f;
-  --fondo:#f9fafb;
-  --texto:#1f2d3d;
+--rosa:#f5a2f5;
+--rosa-fuerte:#e15be1;
+--verde:#007b7f;
+--fondo:#f9fafb;
 }
-
-*{box-sizing:border-box}
 
 body{
-  margin:0;
-  font-family:'Inter',sans-serif;
-  background:var(--fondo);
-  color:var(--texto);
-}
-
-/* TOP BAR */
-.topbar{
-  background:var(--rosa);
-  color:white;
-  text-align:center;
-  font-size:0.85rem;
-  padding:6px;
+margin:0;
+font-family:'Inter',sans-serif;
+background:var(--fondo);
 }
 
 /* HEADER */
-header{
-  background:white;
-  padding:12px;
-  text-align:center;
-  box-shadow:0 2px 10px rgba(0,0,0,0.05);
-  position:sticky;
-  top:0;
-  z-index:1000;
+.topbar{
+background:var(--rosa);
+color:white;
+text-align:center;
+padding:6px;
 }
 
-header img{
-  max-width:160px;
+header{
+text-align:center;
+background:white;
+padding:15px;
+box-shadow:0 2px 10px rgba(0,0,0,0.05);
 }
 
 #buscador{
-  margin-top:10px;
-  padding:10px;
-  width:90%;
-  max-width:320px;
-  border-radius:8px;
-  border:1px solid #ddd;
+margin-top:10px;
+padding:10px;
+width:300px;
+border-radius:8px;
+border:1px solid #ddd;
 }
 
 /* HERO */
 .hero{
-  margin:20px auto;
-  max-width:1000px;
-  background:linear-gradient(135deg,#f5a2f5,#ffe6ff);
-  padding:30px;
-  border-radius:14px;
-  text-align:center;
-}
-
-.hero h1{
-  margin:0;
-}
-
-.hero p{
-  color:#555;
+margin:20px;
+padding:25px;
+background:linear-gradient(135deg,#f5a2f5,#ffe6ff);
+border-radius:12px;
+text-align:center;
 }
 
 .boton{
-  background:linear-gradient(135deg,var(--rosa-fuerte),var(--verde));
-  color:white;
-  border:none;
-  padding:10px 16px;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-/* BENEFICIOS */
-.beneficios{
-  display:flex;
-  gap:15px;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin:20px;
-  font-size:0.9rem;
+background:linear-gradient(135deg,#e15be1,#007b7f);
+color:white;
+border:none;
+padding:10px;
+border-radius:8px;
+cursor:pointer;
 }
 
 /* PRODUCTOS */
-.container{
-  max-width:1100px;
-  margin:auto;
-}
-
 .productos{
-  display:flex;
-  flex-wrap:wrap;
-  gap:15px;
-  justify-content:center;
+display:flex;
+flex-wrap:wrap;
+gap:15px;
+justify-content:center;
 }
 
 .producto{
-  background:white;
-  border-radius:14px;
-  padding:12px;
-  width:220px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.08);
-  transition:0.25s;
-}
-
-.producto:hover{
-  transform:translateY(-5px);
+background:white;
+padding:10px;
+border-radius:12px;
+width:220px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
 .producto img{
-  width:100%;
-  height:150px;
-  object-fit:contain;
-}
-
-.producto h3{
-  font-size:0.95rem;
-  min-height:40px;
+width:100%;
+height:150px;
+object-fit:contain;
 }
 
 .precio{
-  color:var(--rosa-fuerte);
-  font-weight:bold;
-  font-size:1.2rem;
-}
-
-/* CONTROLES */
-.control-cantidad{
-  display:flex;
-  justify-content:center;
-  gap:6px;
-  margin:6px 0;
-}
-
-.control-cantidad input{
-  width:40px;
-  text-align:center;
-}
-
-/* POPUP */
-#popup{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--verde);
-  color:white;
-  padding:10px 20px;
-  border-radius:8px;
-  display:none;
+color:#e15be1;
+font-weight:bold;
 }
 
 /* CARRITO */
 #carrito{
-  position:fixed;
-  right:20px;
-  top:100px;
-  background:white;
-  width:300px;
-  padding:15px;
-  border-radius:10px;
-  box-shadow:0 5px 20px rgba(0,0,0,0.15);
-  display:none;
+position:fixed;
+right:0;
+top:0;
+width:320px;
+height:100%;
+background:white;
+box-shadow:-3px 0 10px rgba(0,0,0,0.2);
+padding:15px;
+transform:translateX(100%);
+transition:0.3s;
+z-index:2000;
+overflow-y:auto;
 }
 
 #carrito.mostrar{
-  display:block;
+transform:translateX(0);
 }
+
+#contador{
+position:absolute;
+top:-5px;
+right:-5px;
+background:red;
+color:white;
+border-radius:50%;
+padding:2px 6px;
+font-size:12px;
+}
+
+/* BOTONES */
+.float{
+position:fixed;
+right:15px;
+border-radius:50%;
+padding:12px;
+cursor:pointer;
+z-index:999;
+}
+
+.whatsapp{bottom:120px;background:#25d366;color:white;}
+.carrito-btn{bottom:60px;background:white;border:2px solid #007b7f;}
+.insta{bottom:180px;background:white;border:2px solid #E1306C;}
 
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-🎓 Insumos odontológicos pensados para estudiantes
-</div>
+<div class="topbar">🎓 Insumos odontológicos para estudiantes</div>
 
 <header>
-<img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg">
+<img src="https://raw.githubusercontent.com/SmileMarket/Pruebas/refs/heads/main/img/Logo.jpg" width="120">
 <br>
-<input type="text" id="buscador" placeholder="Buscar productos...">
+<input id="buscador" placeholder="Buscar productos...">
 </header>
 
 <div class="hero">
-<h1>Todo lo que necesitás para cursar odontología</h1>
-<p>Kits, materiales y accesorios para cada etapa de la carrera</p>
+<h2>Todo lo que necesitás para cursar odontología</h2>
+<p>Kits y materiales para estudiantes</p>
 <button class="boton">Ver productos</button>
 </div>
 
-<div class="beneficios">
-<div>🎓 Pensado para estudiantes</div>
-<div>💰 Precios accesibles</div>
-<div>📦 Armá tu kit completo</div>
-<div>💬 Atención por WhatsApp</div>
-</div>
-
-<div class="container">
 <div class="productos" id="productos"></div>
-</div>
 
-<div id="popup">Producto agregado</div>
-
+<!-- CARRITO -->
 <div id="carrito">
-<h3>Carrito</h3>
+<h3>Tu carrito</h3>
 <div id="carrito-items"></div>
-<div id="total"></div>
+<h3 id="total"></h3>
+
+<button class="boton" onclick="enviarWhatsApp()">
+Enviar pedido por WhatsApp
+</button>
 </div>
 
-<!-- BOTONES FLOTANTES -->
+<!-- BOTONES -->
+<div class="float whatsapp" onclick="consultaWhatsApp()">💬</div>
 
-<a href="https://wa.me/5491130335334" target="_blank"
-style="position:fixed;right:15px;bottom:100px;background:#25d366;color:white;padding:12px;border-radius:50%;z-index:999;">
-💬
-</a>
-
-<div onclick="toggleCarrito()"
-style="position:fixed;right:15px;bottom:40px;background:white;border:2px solid #007b7f;padding:12px;border-radius:50%;cursor:pointer;z-index:999;">
+<div class="float carrito-btn" onclick="toggleCarrito()">
 🛒
+<span id="contador">0</span>
 </div>
 
-<a href="https://www.instagram.com/smilemarket.ar" target="_blank"
-style="position:fixed;right:15px;bottom:160px;background:white;border:2px solid #E1306C;padding:12px;border-radius:50%;z-index:999;">
-📷
-</a>
+<a href="https://www.instagram.com/smilemarket.ar" target="_blank" class="float insta">📷</a>
 
 <script src="main.js"></script>
 
